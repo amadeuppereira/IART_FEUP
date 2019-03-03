@@ -3,91 +3,104 @@
 #include <string>
 #include <vector>
 
-const int capacity[] = {4,3};
+const std::pair<int, int> capacity = std::make_pair(4,3);
 
-int* enc1(int current[2]) {
-    if(current[0] < capacity[0]) {
-        int* ret = new int[2];
-        ret[0] = capacity[0];
-        ret[1] = current[1];
-        return ret;
+// ------ OPERATORS --------
+
+bool enc1(std::pair<int, int> current, std::pair<int, int>& ret) {
+    if(current.first < capacity.first) {
+        ret = std::make_pair(capacity.first,current.second);
+        return true;
     } else {
-        return NULL;
+        return false;
     }
 }
 
-int* enc2(int current[2]) {
-    if(current[1] < capacity[1]) {
-        int* ret = new int[2];
-        ret[0] = current[0];
-        ret[1] = capacity[1];
-        return ret;
+bool enc2(std::pair<int, int> current, std::pair<int, int>& ret) {
+    if(current.second < capacity.second) {
+        ret = std::make_pair(current.first, capacity.second);
+        return true;
     } else {
-        return NULL;
+        return false;
     }
 }
 
-int* esv1(int current[2]) {
-    if(current[0] > 0) {
-        int* ret = new int[2];
-        ret[0] = 0;
-        ret[1] = current[1];
-        return ret;
+bool esv1(std::pair<int, int> current, std::pair<int, int>& ret) {
+    if(current.first > 0) {
+        ret = std::make_pair(0, current.second);
+        return true;
     } else {
-        return NULL;
+        return false;
     }
 }
 
-int* esv2(int current[2]) {
-    if(current[1] > 0) {
-        int* ret = new int[2];
-        ret[0] = current[0];
-        ret[1] = 0;
-        return ret;
+bool esv2(std::pair<int, int> current, std::pair<int, int>& ret) {
+    if(current.second > 0) {
+        ret = std::make_pair(current.first, 0);
+        return true;
     } else {
-        return NULL;
+        return false;
     }
 }
 
-int* d12(int current[2]) {
-    if((current[0] > 0) && (current[1] < capacity[1])) {
-        if(current[0] >= capacity[1] - current[1]) {
-            int* ret = new int[2];
-            ret[0] = current[0] - (capacity[1] - current[1]);
-            ret[1] = capacity[1];
-            return ret;
+bool d12(std::pair<int, int> current, std::pair<int, int>& ret) {
+    if((current.first > 0) && (current.second < capacity.second)) {
+        if(current.first >= capacity.second - current.second) {
+            ret = std::make_pair(current.first - (capacity.second - current.second),
+                                capacity.second);
+            return true;
         } else {
-            int* ret = new int[2];
-            ret[0] = 0;
-            ret[1] = current[1] + current[0];
-            return ret;
+            ret = std::make_pair(0, current.second + current.first);
+            return true;
         }
     } else {
-        return NULL;
+        return false;
     }
 }
 
-int* d21(int current[2]) {
-    if((current[1] > 0) && (current[0] < capacity[0])) {
-        if(current[1] >= capacity[0] - current[0]) {
-            int* ret = new int[2];
-            ret[0] = capacity[0];
-            ret[1] = current[1] - (capacity[0] - current[0]);
-            return ret;
+bool d21(std::pair<int, int> current, std::pair<int, int>& ret) {
+    if((current.second > 0) && (current.first < capacity.first)) {
+        if(current.second >= capacity.first - current.first) {
+            ret = std::make_pair(capacity.first,
+                                current.second - (capacity.first - current.first));
+            return true;
         } else {
-            int* ret = new int[2];
-            ret[0] = current[0] + current[1];
-            ret[1] = 0;
-            return ret;
+            ret = std::make_pair(current.first + current.second, 0);
+            return true;
         }
     } else {
-        return NULL;
+        return false;
     }
 }
+
+std::string operators_name(int index) {
+    switch (index)
+    {
+        case 0:
+            return "enc1";
+        case 1:
+            return "enc2";
+        case 2:
+            return "esv1";
+        case 3:
+            return "esv2";
+        case 4:
+            return "d12";
+        case 5:
+            return "d21";
+        default:
+            return "";
+    }
+}
+
+
+// ------- NODE ----------
+
 
 typedef struct Node {
-    int* current;
+    std::pair<int, int> current;
     std::vector<std::string> path;
+    std::pair<int, int> parent;
     int value;
 } Node;
 
@@ -95,56 +108,60 @@ void print(Node n) {
     for(std::string p : n.path) {
         std::cout << p << std::endl;
     }
-    //std::cout << n.current[0] << "  -   " << n.current[1] << std::endl; 
 }
 
-// bool operator<(const Node& a, const Node& b) {
-//   return a.value <= b.value;
-// }
-
-bool operator==(const Node& a, const Node& b) {
-  return a.current[0] == b.current[0] && a.current[1] == b.current[1];
+bool operator<(const Node& a, const Node& b) {
+  return a.value < b.value;
 }
+
+// -----------------------
 
 int main(int argc, char const *argv[]){
+    if(argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <final state>" << "(-1) for unspecified"<< std::endl;
+        return -1;
+    }
 
-    const int estado_obj[] = {1,0};
+    const std::pair<int, int> estado_obj = std::make_pair(atoi(argv[1]), atoi(argv[2]));
 
     std::priority_queue<Node> q;
-    //std::vector<Node> aux = {};
 
     Node start;
-    start.current = new int[2];
-    start.current[0] = 0; start.current[1] = 0;
+    start.current = std::make_pair(0, 0);
     start.path = {};
+    start.parent = std::make_pair(0, 0);
     start.value = 0;
 
     q.push(start);
 
-    typedef int* (*fn)(int[2]);
+    typedef bool (*fn)(std::pair<int, int>, std::pair<int, int>&);
     std::vector<fn> operators = {enc1, enc2, esv1, esv2, d12, d21};
 
     while(true) {    
-        Node top = q.top();
+        Node top = q.top();        
 
-        if(top.current[0] == estado_obj[0] && top.current[1] == estado_obj[1]) break;
+        if(((estado_obj.first  == -1) ? true : top.current.first  == estado_obj.first) &&
+           ((estado_obj.second == -1) ? true : top.current.second == estado_obj.second)) break;
+
         q.pop();
-        aux.push_back(top);
 
+        std::pair<int, int> updated;
         for(int i = 0; i < operators.size(); i++) {
-            auto res = operators[i](top.current);
-            if(!res) continue;
+            bool res = operators[i](top.current, updated);
+
+            if(!res ||
+            (updated.first == top.parent.first &&
+            updated.second == top.parent.second)) continue;
+
             Node n;
-            n.current = res;
+            n.current = updated;
             n.path = top.path;
-            n.path.push_back(std::to_string(i));
+            n.path.push_back(operators_name(i));
             n.value = 1;
+            n.parent = top.current;
 
             q.push(n);
         } 
-        // std::cin.get();
-        delete top.current;
-        q.pop();
     }
 
     print(q.top());
