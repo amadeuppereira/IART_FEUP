@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+bool DEPTH = false;
+
 const std::pair<int, int> capacity = std::make_pair(4,3);
 
 // ------ OPERATORS --------
@@ -111,16 +113,21 @@ void print(Node n) {
 }
 
 bool operator<(const Node& a, const Node& b) {
-  return a.value < b.value;
+    if(DEPTH)
+        return a.value <= b.value;
+    else
+        return a.value < b.value;
 }
 
 // -----------------------
 
 int main(int argc, char const *argv[]){
-    if(argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <final state>" << "(-1) for unspecified"<< std::endl;
+    if(argc < 3 || argc > 4) {
+        std::cout << "Usage: " << argv[0] << " <final state 1> <final state 2> (-1 for unspecified) [depth]"<< std::endl;
         return -1;
     }
+    
+    if(argc == 4) DEPTH = (strcmp(argv[3], "true") == 0) ? true : false;
 
     const std::pair<int, int> estado_obj = std::make_pair(atoi(argv[1]), atoi(argv[2]));
 
@@ -138,7 +145,8 @@ int main(int argc, char const *argv[]){
     std::vector<fn> operators = {enc1, enc2, esv1, esv2, d12, d21};
 
     while(true) {    
-        Node top = q.top();        
+        Node top = q.top();  
+        print(top); std::cout << std::endl;      
 
         if(((estado_obj.first  == -1) ? true : top.current.first  == estado_obj.first) &&
            ((estado_obj.second == -1) ? true : top.current.second == estado_obj.second)) break;
