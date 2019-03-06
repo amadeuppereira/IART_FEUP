@@ -2,6 +2,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <chrono>
 
 bool DEPTH = false;
 
@@ -144,9 +145,9 @@ int main(int argc, char const *argv[]){
     typedef bool (*fn)(std::pair<int, int>, std::pair<int, int>&);
     std::vector<fn> operators = {enc1, enc2, esv1, esv2, d12, d21};
 
+    auto sTime = std::chrono::high_resolution_clock::now();
     while(true) {    
-        Node top = q.top();  
-        print(top); std::cout << std::endl;      
+        Node top = q.top();    
 
         if(((estado_obj.first  == -1) ? true : top.current.first  == estado_obj.first) &&
            ((estado_obj.second == -1) ? true : top.current.second == estado_obj.second)) break;
@@ -171,8 +172,10 @@ int main(int argc, char const *argv[]){
             q.push(n);
         } 
     }
-
+    auto fTime = std::chrono::high_resolution_clock::now();
     print(q.top());
+
+    std::cout << "\nExecution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(sTime-fTime).count() << " ms\n"; 
 
     return 0;
 }
