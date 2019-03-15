@@ -66,7 +66,7 @@ def handleDown(grid, x, y):
 
 pygame.init()
 screen = pygame.display.set_mode((600, 600))
-pygame.display.set_caption('Cohesion')
+pygame.display.set_caption('Cohesion IART')
 
 run = True
 clock = pygame.time.Clock()
