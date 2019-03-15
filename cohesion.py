@@ -5,23 +5,6 @@ Basic structure for game cohesion(can be found in the play store)
 """
 import pygame
 
-"""
-class Cohesion:
-
-
-    #FIELD DIMENSIONS
-    ROWS = 4
-    COLUMNS = 4
-
-    DIRECTIONS = {
-        "UP": (0, 1),
-        "RIGHT": (1, 0),
-        "LEFT": (-1, 0),
-        "DOWN": (0, -1),
-    }
-
-"""
-
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
