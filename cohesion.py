@@ -41,23 +41,27 @@ for row in range(4):
         matrix[row].append(0)
 
 def handleRight(grid, x, y):
-    grid[x][y + 1] = grid[x][y]
-    grid[x][y] = 0
+    if grid[x][y + 1] == 0:
+        grid[x][y + 1] = grid[x][y]
+        grid[x][y] = 0
     return grid
 
 def handleUp(grid, x, y):
-    grid[x-1][y] = grid[x][y]
-    grid[x][y] = 0
+    if grid[x-1][y] == 0:
+        grid[x-1][y] = grid[x][y]
+        grid[x][y] = 0
     return grid
 
 def handleLeft(grid, x, y):
-    grid[x][y-1] = grid[x][y]
-    grid[x][y] = 0
+    if grid[x][y-1] == 0:
+        grid[x][y-1] = grid[x][y]
+        grid[x][y] = 0
     return grid
 
 def handleDown(grid, x, y):
-    grid[x+1][y] = grid[x][y]
-    grid[x][y] = 0
+    if grid[x+1][y] == 0:
+        grid[x+1][y] = grid[x][y]
+        grid[x][y] = 0
     return grid
 
 pygame.init()
@@ -90,16 +94,20 @@ while run:
     if len(currentSelected) == 2:
 
         if keys[pygame.K_RIGHT]:
-            matrix = handleRight(matrix, currentSelected[0], currentSelected[1])
+            if currentSelected[1]+1 < 4:
+                matrix = handleRight(matrix, currentSelected[0], currentSelected[1])
             currentSelected = []
         elif keys[pygame.K_UP]:
-            matrix = handleUp(matrix, currentSelected[0], currentSelected[1])
+            if currentSelected[0]-1 > -1:
+                matrix = handleUp(matrix, currentSelected[0], currentSelected[1])
             currentSelected = []
         elif keys[pygame.K_LEFT]:
-            matrix = handleLeft(matrix, currentSelected[0], currentSelected[1])
+            if currentSelected[1]-1 > -1:
+                matrix = handleLeft(matrix, currentSelected[0], currentSelected[1])
             currentSelected = []
         elif keys[pygame.K_DOWN]:
-            matrix = handleDown(matrix, currentSelected[0], currentSelected[1])
+            if currentSelected[0]+1 < 4:
+                matrix = handleDown(matrix, currentSelected[0], currentSelected[1])
             currentSelected = []
 
     for row in range(4):
