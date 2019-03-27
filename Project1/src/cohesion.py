@@ -33,7 +33,7 @@ while run:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # click mouse and get position
             [x,y] = pygame.mouse.get_pos()
-            block = game.get_block(y // (WIDTH + MARGIN), x // (WIDTH + MARGIN))
+            block = game.get_block(y // (HEIGHT + MARGIN), x // (WIDTH + MARGIN))
 
     keys = pygame.key.get_pressed()
 
@@ -63,7 +63,11 @@ while run:
 
     if game.finished:
         LEVEL += 1
-        game = Game(levels[str(LEVEL)])
+        if(LEVEL > len(levels)):
+            run = False
+        else:
+            game = Game(levels[str(LEVEL)])
+            
     # limit to 60 frames per second
     clock.tick(60)
 
