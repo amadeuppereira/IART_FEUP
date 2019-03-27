@@ -18,6 +18,7 @@ class Game:
                     self.blocks.append(new)
 
         self.update_blocks()
+        self.update_blocks()
             
     def update_board(self):
         for j in range(len(self.board)):
@@ -29,7 +30,7 @@ class Game:
                 self.board[x][y] = block.color
 
     def update_blocks(self):
-        for block1 in (self.blocks):
+        for block1 in self.blocks:
             for block2 in reversed(self.blocks):
                 if block1 != block2:
                     if block1.check_block_adjacent(block2):
