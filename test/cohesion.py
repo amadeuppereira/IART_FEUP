@@ -20,11 +20,9 @@ colors = {
     4: YELLOW
 }
 
-
 #Cell dimensions
 WIDTH = 138
 HEIGHT = 138
-
 #Margin between cells
 DISPLAY_WIDTH = 600
 DISPLAY_HEIGHT = 600
@@ -74,11 +72,15 @@ while run:
             if game.move(block, "right"):
                 block = None
 
-    for row in range(4):
-        for column in range(4):
-            color = colors[game.board[row][column]]
-            pygame.draw.rect(screen, color, [(MARGIN + WIDTH) * column + MARGIN, (MARGIN + HEIGHT) * row + MARGIN, WIDTH, HEIGHT])
     
+    for i in range(4):
+        for j in range(4):
+            color = colors[game.board[i][j]]
+            pygame.draw.rect(screen, color, \
+            [(MARGIN + WIDTH) * j + MARGIN, \
+             (MARGIN + HEIGHT) * i + MARGIN, \
+             WIDTH, HEIGHT])
+
     # limit to 60 frames per second
     clock.tick(60)
 
