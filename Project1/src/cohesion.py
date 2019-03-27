@@ -32,7 +32,7 @@ while run:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # click mouse and get position
-            [x,y] = pygame.mouse.get_pos()
+            [x,y] = pygame.mouse.get_pos()    
             block = game.get_block(y // (HEIGHT + MARGIN), x // (WIDTH + MARGIN))
 
     keys = pygame.key.get_pressed()
@@ -56,6 +56,11 @@ while run:
     for i in range(len(game.board)):
         for j in range(len(game.board[0])):
             color = colors[game.board[i][j]]
+            #highlight
+            if block and [i,j] in block.coords:
+                (r,g,b) = color
+                color = (r*0.5, g*0.5, b*0.5)
+
             pygame.draw.rect(screen, color, \
             [(MARGIN + WIDTH) * j + MARGIN, \
              (MARGIN + HEIGHT) * i + MARGIN, \
