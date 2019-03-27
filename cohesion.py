@@ -1,7 +1,6 @@
 """
 Cohesion.py
 Basic structure for game cohesion(can be found in the play store)
-
 """
 import pygame
 import copy
@@ -12,11 +11,11 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 #Cell dimensions
-WIDTH = 100
-HEIGHT = 100
+WIDTH = 138
+HEIGHT = 138
 
 #Margin between cells
-MARGIN = 40
+MARGIN = 10
 
 matrix = []
 for row in range(4):
@@ -33,7 +32,7 @@ def takeX(elem):
 def handleRight(grid, x, y):
 	color = grid[x][y]
 	blocks[str(color)].sort(key = takeY ,reverse=True)
-	if possibleMove(grid, x, y, 'up'):
+	if possibleMove(grid, x, y, 'right'):
 		for cell in blocks[str(color)]:
 			grid = moveRightCell(grid , cell[0], cell[1])
 			cell[1] += 1
@@ -44,6 +43,7 @@ def moveRightCell(grid, x, y):
 		grid[x][y+1] = grid[x][y]
 		grid[x][y] = 0
 	return grid
+
 
 def handleUp(grid, x, y):
 	color = grid[x][y]
@@ -76,6 +76,7 @@ def moveLeftCell(grid, x, y):
 		grid[x][y] = 0
 	return grid
 
+
 def handleDown(grid, x, y):
 	color = grid[x][y]
 	blocks[str(color)].sort(key = takeX, reverse=True)
@@ -84,8 +85,6 @@ def handleDown(grid, x, y):
 			grid = moveDownCell(grid , cell[0], cell[1])
 			cell[0] += 1
 	return grid
-
-    
 
 def moveDownCell(grid, x, y):
 	if grid[x+1][y] == 0 or grid[x+1][y] == grid[x][y]:
@@ -132,6 +131,8 @@ blocks["1"] = [[0,0],[0,1]]
 #block for red
 blocks["2"] = [[2,1]]
 
+blocks["3"] = [[3,3]]
+
 def fillMatrix(blocks):
 	for colorBlock in blocks:
 		for i in range(len(blocks[colorBlock])):
@@ -140,10 +141,6 @@ def fillMatrix(blocks):
 
 fillMatrix(blocks)
 print(matrix)
-
-# Give some cells colors just for testing
-# matrix[0][0] = 1
-# matrix[2][1] = 1
 
 # Main Loop
 while run:
@@ -166,7 +163,6 @@ while run:
         if keys[pygame.K_RIGHT]:
             if currentSelected[1]+1 < 4:
                 matrix = handleRight(matrix, currentSelected[0], currentSelected[1])
-                print(blocks)
             currentSelected = []
         elif keys[pygame.K_UP]:
             if currentSelected[0]-1 > -1:
@@ -179,7 +175,6 @@ while run:
         elif keys[pygame.K_DOWN]:
             if currentSelected[0]+1 < 4:
                 matrix = handleDown(matrix, currentSelected[0], currentSelected[1])
-                print(blocks)
             currentSelected = []
 
     for row in range(4):
@@ -189,6 +184,8 @@ while run:
                 color = GREEN
             elif matrix[row][column] == 2:
                 color = RED
+            elif matrix[row][column]==3 :
+                color = BLACK
             pygame.draw.rect(screen, color, [(MARGIN + WIDTH) * column + MARGIN, (MARGIN + HEIGHT) * row + MARGIN, WIDTH, HEIGHT])
     
     # limit to 60 frames per second
