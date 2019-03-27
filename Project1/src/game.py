@@ -13,16 +13,10 @@ class Game:
         for j in range(len(self.board)):
             for i in range(len(self.board[0])):
                 new = Block(i, j, self.board[i][j])
-                if new.color == 0:
-                    continue
-                    
-                flag = False
-                for block in self.blocks:
-                    if block.check_block_adjacent(new):
-                        flag = True
-
-                if not flag:
+                if new.color != 0:
                     self.blocks.append(new)
+
+        self.update_blocks()
             
     def update_board(self):
         for j in range(len(self.board)):
@@ -33,6 +27,16 @@ class Game:
             for [x,y] in block.coords:
                 self.board[x][y] = block.color
 
+    def update_blocks(self):
+        for block1 in (self.blocks):
+            for block2 in reversed(self.blocks):
+                if block1 != block2:
+                    if block1.check_block_adjacent(block2):
+                        self.blocks.remove(block2)
+                
+        if self.is_finished():
+            self.finished = True
+        
     def is_finished(self):
         colors = []
         for block in self.blocks:
@@ -78,17 +82,7 @@ class Game:
                     return block
 
         return False
-
-    def update_blocks(self):
-        for block1 in reversed(self.blocks):
-            for block2 in reversed(self.blocks):
-                if block1 != block2:
-                    if block1.check_block_adjacent(block2):
-                        self.blocks.remove(block2)
                 
-        if self.is_finished():
-            self.finished = True
-                    
     def move(self, block, move):
         if move == "up" and self.is_possible_up(block):
                 block.up()
@@ -111,4 +105,4 @@ class Game:
                 self.update_blocks()
                 return True
 
-        return False
+        return False                

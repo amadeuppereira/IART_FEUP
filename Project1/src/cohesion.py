@@ -3,30 +3,14 @@ Cohesion.py
 Basic structure for game cohesion(can be found in the play store)
 """
 import pygame
+import json
 from game import Game
+from settings import *
 
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
+levels = []
 
-colors = {
-    0: WHITE,
-    1: RED,
-    2: GREEN,
-    3: BLUE,
-    4: YELLOW
-}
-
-#Cell dimensions
-WIDTH = 138
-HEIGHT = 138
-#Margin between cells
-DISPLAY_WIDTH = 600
-DISPLAY_HEIGHT = 600
-MARGIN = 10
+with open('levels.json') as json_file:  
+    levels = json.load(json_file)[GAMEMODE]
 
 pygame.init()
 screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
@@ -35,17 +19,13 @@ pygame.display.set_caption('Cohesion IART')
 run = True
 clock = pygame.time.Clock()
 
-game = Game([[0,0,0,0],
-             [0,1,0,1],
-             [2,2,1,2],
-             [3,3,3,3]])
+game = Game(levels[str(LEVEL)])
 
 block = None
 
 # Main Loop
 while run:
-    run = not game.finished
-
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -73,14 +53,17 @@ while run:
                 block = None
 
     
-    for i in range(4):
-        for j in range(4):
+    for i in range(len(game.board)):
+        for j in range(len(game.board[0])):
             color = colors[game.board[i][j]]
             pygame.draw.rect(screen, color, \
             [(MARGIN + WIDTH) * j + MARGIN, \
              (MARGIN + HEIGHT) * i + MARGIN, \
              WIDTH, HEIGHT])
 
+    if game.finished:
+        LEVEL += 1
+        game = Game(levels[str(LEVEL)])
     # limit to 60 frames per second
     clock.tick(60)
 

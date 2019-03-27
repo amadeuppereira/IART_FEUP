@@ -24,8 +24,19 @@ class Block:
                [x-1,y] in self.coords or \
                [x+1,y] in self.coords:
 
-              self.coords += block.coords
-              return True
+                self.coords += block.coords
+
+                # remove duplicates
+                seen = set()
+                newlist = []
+                for coord in self.coords:
+                    t = tuple(coord)
+                    if t not in seen:
+                        newlist.append(coord)
+                        seen.add(t)
+                self.coords = newlist
+
+                return True
             
         return False
 
