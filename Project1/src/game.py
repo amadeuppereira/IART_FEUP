@@ -1,4 +1,5 @@
 from block import Block
+import logic
 
 class Game:
 
