@@ -1,12 +1,17 @@
 from block import Block
-import logic
+from logic import heuristic
+import time
+from tree import Tree
 
 class Game:
 
-    def __init__(self, board):
+    def __init__(self, board, level):
+        print("----- LEVEL NOº " + level + " -----")
         self.board = board
         self.generateBlocks()
         self.finished = False
+        self.number_moves = 0
+        self.start_time = time.time()
 
     def generateBlocks(self):
         self.blocks = []
@@ -46,7 +51,9 @@ class Game:
                 return False
             else:
                 colors.append(block.color)
-            
+        print("Finished with " + str(self.number_moves) + " moves")
+        elapsed_time = time.time() - self.start_time
+        print("You took " + str("{0:.2f}".format(elapsed_time)) + " seconds")
         return True
 
     def is_possible_up(self, block):
@@ -87,21 +94,25 @@ class Game:
                 
     def move(self, block, move):
         if move == "up" and self.is_possible_up(block):
+                self.number_moves = self.number_moves + 1
                 block.up()
                 self.update_board()
                 self.update_blocks()
                 return True
         elif move == "down" and self.is_possible_down(block):
+                self.number_moves = self.number_moves + 1
                 block.down()
                 self.update_board()
                 self.update_blocks()
                 return True
         elif move == "left" and self.is_possible_left(block):
+                self.number_moves = self.number_moves + 1
                 block.left()
                 self.update_board()
                 self.update_blocks()
                 return True
         elif move == "right" and self.is_possible_right(block):
+                self.number_moves = self.number_moves + 1
                 block.right()
                 self.update_board()
                 self.update_blocks()

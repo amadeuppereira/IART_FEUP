@@ -15,7 +15,7 @@ def distance_between_points(x1,y1,x2,y2) :
     return math.sqrt( (x2 - x1)**2 + (y2 - y1)**2)
 
 def distance_equal_pieces(piecesCoords) :
-    # TODO: Talvez ver os pontos que formam blocks e calcular so a distancia destes a outros blocos
+    # TODO: Ver os casos em que as peças ficam bloqueadas
     totalDistance = 0
     for i in range(len(piecesCoords)):
         j = i+1
@@ -37,8 +37,8 @@ def heuristic(board) :
 
 
 # To test:
-board = [[0,0,1,0],
-        [0,0,1,1],
-        [0,2,2,2],
-        [3,3,3,3]]
-print(heuristic(board))
+# board = [[0,0,1,0],
+#         [0,0,1,1],
+#         [0,2,2,2],
+#         [3,3,3,3]]
+# print(heuristic(board))
