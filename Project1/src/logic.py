@@ -1,4 +1,7 @@
 import math
+from game import Game
+from node import Node
+import queue
 
 def getPiecesPositionsByColor(board):
     pieces = {}
@@ -34,6 +37,13 @@ def heuristic(board) :
     for key, value in pieces.items():
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
+
+def dfs(game):
+
+    q = Queue.PriorityQueue()
+    root = Node(game.board, [])
+    q.put(root)
+
 
 
 # To test:

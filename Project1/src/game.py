@@ -1,5 +1,4 @@
 from block import Block
-from logic import *
 import time
 from node import Node
 
