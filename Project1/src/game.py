@@ -1,7 +1,7 @@
 from block import Block
-from logic import heuristic
+from logic import *
 import time
-from tree import Tree
+from node import Node
 
 class Game:
 
@@ -118,4 +118,19 @@ class Game:
                 self.update_blocks()
                 return True
 
-        return False                
+        return False
+
+    def init_computer_game(self) :
+        # Generate tree and use algorithms here
+        self.nodes = []
+
+        # TODO: Create Nodes here
+
+
+
+    def computer_move(self) :
+        # Read generated tree and only make movements here
+        # self.nodes.print_tree()
+
+        # update board
+        print('computer_move')
