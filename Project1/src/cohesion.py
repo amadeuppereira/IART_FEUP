@@ -131,9 +131,8 @@ def computer_game_loop():
     global LEVEL
     global run
     global game
-    global block
-
-    game.init_computer_game()
+    # global block
+    block = None
     
     screen.fill(BLACK)
 
@@ -143,16 +142,13 @@ def computer_game_loop():
             if event.type == pygame.QUIT:
                 run = False
         
-        # Computer Move Function Call
-        game.computer_move()
-
         for i in range(len(game.board)):
             for j in range(len(game.board[0])):
                 color = colors[game.board[i][j]]
-                # #highlight
-                # if block and [i,j] in block.coords:
-                #     (r,g,b) = color
-                #     color = (r*0.5, g*0.5, b*0.5)
+                #highlight
+                if block and [i,j] in block.coords:
+                    (r,g,b) = color
+                    color = (r*0.5, g*0.5, b*0.5)
 
                 pygame.draw.rect(screen, color, \
                 [(MARGIN + WIDTH) * j + MARGIN, \
@@ -171,6 +167,7 @@ def computer_game_loop():
 
         pygame.display.flip()
 
-game_intro()
+computer_game_loop()
 pygame.quit()
+
 quit()

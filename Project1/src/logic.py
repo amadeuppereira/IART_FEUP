@@ -1,7 +1,8 @@
 import math
 from game import Game
 from node import Node
-import queue
+from queue import PriorityQueue
+from copy import deepcopy
 
 def getPiecesPositionsByColor(board):
     pieces = {}
@@ -38,17 +39,73 @@ def heuristic(board) :
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
-def dfs(game):
 
-    q = Queue.PriorityQueue()
-    root = Node(game.board, [])
-    q.put(root)
+def dfs(game):
+    visited = []
+    path = []
+    leafs = PriorityQueue()
+    leafs.put((0, game, path, visited))
+
+    while not leafs.empty():
+        _, current_game, path, visited = leafs.get()
+
+        if current_game.finished:
+            return path
+
+        visited = visited + [current_game]
+
+        # If not goal, get its child nodes
+        child_nodes = {}
+
+        # 4. Add child nodes to the leafs if they haven't been visited yet
+        for node in child_nodes:
+            if node not in visited:
+                if node == goal:
+                    return path + [node]
+                depth_of_node = len(path)
+                # The priority queue prioritises lower values over higher ones (i.e. 1 is prioritised higher than 10)
+                # Since we are using depth of node as our prioritisation measure we need to pass in negative priorities
+                # To ensure that nodes with greater depth get explored before shallower ones
+                leafs.put((-depth_of_node, node, path + [node], visited + [node]))
+
+    return path
+
+def get_game_moves(game):
+    temp = deepcopy(game)
+    ret = []
+    i = 0
+
+    for block in game.blocks:
+        if temp.move(block, "up"):
+            ret.append(("{} u".format(i), temp))
+            temp = deepcopy(game)
+        if temp.move(block, "down"):
+            ret.append(("{} d".format(i), temp))
+            temp = deepcopy(game)
+        if temp.move(block, "left"):
+            ret.append(("{} l".format(i), temp))
+            temp = deepcopy(game)
+        if temp.move(block, "right"):
+            ret.append(("{} r".format(i), temp))
+            temp = deepcopy(game)
+
+        i += 1
+
+    return ret
+
 
 
 
 # To test:
-# board = [[0,0,1,0],
-#         [0,0,1,1],
-#         [0,2,2,2],
-#         [3,3,3,3]]
+board = [[1,0,0,1],
+        [3,1,1,3],
+        [0,3,3,0],
+        [4,0,0,4]]
 # print(heuristic(board))
+
+g = Game(board, 1)
+print(g.blocks)
+print(get_game_moves(g))
+
+# for m, g in get_game_moves(g):
+#     print(g)

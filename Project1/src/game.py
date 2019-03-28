@@ -4,13 +4,22 @@ from node import Node
 
 class Game:
 
-    def __init__(self, board, level):
-        print("----- LEVEL NOº " + level + " -----")
+    def __init__(self, board, level = 1):
+        print("----- LEVEL " + str(level) + " -----")
         self.board = board
         self.generateBlocks()
         self.finished = False
         self.number_moves = 0
         self.start_time = time.time()
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.board == other.board
+        else:
+            return False
+
+    def __repr__(self):
+        return str(self.board)
 
     def generateBlocks(self):
         self.blocks = []
@@ -50,36 +59,36 @@ class Game:
                 return False
             else:
                 colors.append(block.color)
-        print("Finished with " + str(self.number_moves) + " moves")
-        elapsed_time = time.time() - self.start_time
-        print("You took " + str("{0:.2f}".format(elapsed_time)) + " seconds")
+        # print("Finished with " + str(self.number_moves) + " moves")
+        # elapsed_time = time.time() - self.start_time
+        # print("You took " + str("{0:.2f}".format(elapsed_time)) + " seconds")
         return True
 
     def is_possible_up(self, block):
         for [x,y] in block.coords:
-            x = x - 1
-            if x < 0 or (self.board[x][y] != 0 and self.board[x][y] != block.color):
+            x1 = x - 1
+            if x1 < 0 or (self.board[x1][y] != 0 and self.board[x1][y] != block.color):
                 return False
         return True
 
     def is_possible_down(self, block):
         for [x,y] in block.coords:
-            x = x + 1
-            if x > 3 or (self.board[x][y] != 0 and self.board[x][y] != block.color):
+            x1 = x + 1
+            if x1 > 3 or (self.board[x1][y] != 0 and self.board[x1][y] != block.color):
                 return False
         return True
 
     def is_possible_left(self, block):
         for [x,y] in block.coords:
-            y = y - 1
-            if y < 0 or (self.board[x][y] != 0 and self.board[x][y] != block.color):
+            y1 = y - 1
+            if y1 < 0 or (self.board[x][y1] != 0 and self.board[x][y1] != block.color):
                 return False
         return True
 
     def is_possible_right(self, block):
         for [x,y] in block.coords:
-            y = y + 1
-            if y > 3 or (self.board[x][y] != 0 and self.board[x][y] != block.color):
+            y1 = y + 1
+            if y1 > 3 or (self.board[x][y1] != 0 and self.board[x][y1] != block.color):
                 return False
         return True
 
@@ -118,18 +127,3 @@ class Game:
                 return True
 
         return False
-
-    def init_computer_game(self) :
-        # Generate tree and use algorithms here
-        self.nodes = []
-
-        # TODO: Create Nodes here
-
-
-
-    def computer_move(self) :
-        # Read generated tree and only make movements here
-        # self.nodes.print_tree()
-
-        # update board
-        print('computer_move')

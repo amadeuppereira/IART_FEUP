@@ -1,17 +1,16 @@
 class Node:
-    def __init__(self, current, path):
-        self.current = current
+    def __init__(self, game, path = []):
+        self.game = game
         self.path = path
-        self.children = []
 
     def get_current(self):
-        return self.current
-
-    def get_children(self):
-        return self.children
+        return self.game
 
     def get_path(self):
     	return self.path
 
-    def add_child(self, child):
-        self.children.append(child)
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.game == other.game
+        else:
+            return False
