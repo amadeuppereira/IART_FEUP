@@ -7,6 +7,7 @@ import pygame
 import json
 from game import Game
 from settings import *
+from logic import computer_move, get_computer_path
 
 levels = []
 
@@ -131,43 +132,55 @@ def computer_game_loop():
     global LEVEL
     global run
     global game
-    # global block
-    block = None
     
     screen.fill(BLACK)
 
+    path = get_computer_path(game)
+
+    m = 1
+    n = 0
+    
     while run:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         
+        # loop to do moves from path
+        if (m % 110) == 0:
+            if n < len(path):
+                coords = path[n][0]
+                move = path[n][1]
+                block = game.get_block(coords[0], coords[1])
+                game.move(block, move)
+                n = n+1
+        m = m+1
+
         for i in range(len(game.board)):
             for j in range(len(game.board[0])):
                 color = colors[game.board[i][j]]
-                #highlight
-                if block and [i,j] in block.coords:
-                    (r,g,b) = color
-                    color = (r*0.5, g*0.5, b*0.5)
-
                 pygame.draw.rect(screen, color, \
                 [(MARGIN + WIDTH) * j + MARGIN, \
                 (MARGIN + HEIGHT) * i + MARGIN, \
                 WIDTH, HEIGHT])
 
-        if game.finished:
-            LEVEL += 1
-            if(LEVEL > len(levels)):
-                run = False
-            else:
-                game = Game(levels[str(LEVEL)], str(LEVEL))
+        # if game.finished:
+        #     LEVEL += 1
+        #     if(LEVEL > len(levels)):
+        #         run = False
+        #     else:
+        #         if n+1 == len(path) :
+        #             n = 0
+        #             game = Game(levels[str(LEVEL)], str(LEVEL))
+        #             path = get_computer_path(game)
+
                 
         # limit to 60 frames per second
         clock.tick(60)
 
         pygame.display.flip()
 
-computer_game_loop()
+game_intro()
 pygame.quit()
 
 quit()

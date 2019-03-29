@@ -3,11 +3,11 @@ class Node:
         self.game = game
         self.path = path
 
-    def get_current(self):
-        return self.game
+    # def get_current(self):
+    #     return self.game
 
-    def get_path(self):
-    	return self.path
+    # def get_path(self):
+    # 	return self.path
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

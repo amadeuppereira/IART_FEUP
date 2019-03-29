@@ -3,6 +3,7 @@ from game import Game
 from node import Node
 from queue import PriorityQueue
 from copy import deepcopy
+import time
 
 def getPiecesPositionsByColor(board):
     pieces = {}
@@ -70,42 +71,80 @@ def dfs(game):
 
     return path
 
+# Retorna [ ([coordenadas_da_primeira_peça_do_block, direção], [novo_board_gerado]), ... ]
 def get_game_moves(game):
-    temp = deepcopy(game)
+    temp_game = deepcopy(game)
     ret = []
-    i = 0
 
     for block in game.blocks:
-        if temp.move(block, "up"):
-            ret.append(("{} u".format(i), temp))
-            temp = deepcopy(game)
-        if temp.move(block, "down"):
-            ret.append(("{} d".format(i), temp))
-            temp = deepcopy(game)
-        if temp.move(block, "left"):
-            ret.append(("{} l".format(i), temp))
-            temp = deepcopy(game)
-        if temp.move(block, "right"):
-            ret.append(("{} r".format(i), temp))
-            temp = deepcopy(game)
+        temp_game = deepcopy(game)
+        temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
+        temp_coords = temp_block.coords[0][:]
 
-        i += 1
+        if temp_game.move(temp_block, "up"):
+            ret.append(([temp_coords, "up"], temp_game))
+            temp_game = deepcopy(game)
+            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
+
+        if temp_game.move(temp_block, "down"):
+            ret.append(([temp_coords, "down"], temp_game))
+            temp_game = deepcopy(game)
+            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
+
+        if temp_game.move(temp_block, "left"):
+            ret.append(([temp_coords, "left"], temp_game))
+            temp_game = deepcopy(game)
+            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
+
+        if temp_game.move(temp_block, "right"):
+            ret.append(([temp_coords, "right"], temp_game))
+            temp_game = deepcopy(game)
+            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
 
     return ret
 
+# Retorna [ [coords de uma peça de um bloco, movimento], ... ]
+def bfs(game) :
+    visited = []
+    run = True
+    path = []
+    queue = [[game, path, visited]]
 
+    while len(queue) != 0:
+        new_queue = []
 
+        for queue_item in queue :
+            game = queue_item[0]
+            path = queue_item[1]
+            visited = queue_item[2]
+
+            if game.is_finished():
+                return path
+
+            new_moves = get_game_moves(game)
+            
+            for move, new_game in new_moves:
+                if new_game not in visited:
+                    new_path = path + [move]
+                    new_visited = visited + [game]
+                    new_queue.append([new_game, new_path, new_visited])
+        
+        queue = new_queue
+
+    print('No solutions found')
+    return []
+
+def get_computer_path(game) :
+    return bfs(game)
 
 # To test:
-board = [[1,0,0,1],
-        [3,1,1,3],
-        [0,3,3,0],
-        [4,0,0,4]]
-# print(heuristic(board))
-
-g = Game(board, 1)
-print(g.blocks)
-print(get_game_moves(g))
-
-# for m, g in get_game_moves(g):
-#     print(g)
+# board = [[1,2,2,1],
+#         [3,1,1,3],
+#         [2,3,3,2],
+#         [4,1,2,4]]
+# board = [[1,0,0,0],
+#         [0,1,1,0],
+#         [0,3,3,0],
+#         [4,4,0,0]]
+# g = Game(board, 1)
+# print(bfs(g))
