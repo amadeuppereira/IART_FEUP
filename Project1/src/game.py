@@ -104,32 +104,24 @@ class Game:
         if move == "up" and self.is_possible_up(block):
                 self.number_moves = self.number_moves + 1
                 block.up()
-                # self.update_board()
-                # self.update_blocks()
                 self.update_blocks()
                 self.update_board()
                 return True
         elif move == "down" and self.is_possible_down(block):
                 self.number_moves = self.number_moves + 1
                 block.down()
-                # self.update_board()
-                # self.update_blocks()
                 self.update_blocks()
                 self.update_board()
                 return True
         elif move == "left" and self.is_possible_left(block):
                 self.number_moves = self.number_moves + 1
                 block.left()
-                # self.update_board()
-                # self.update_blocks()
                 self.update_blocks()
                 self.update_board()
                 return True
         elif move == "right" and self.is_possible_right(block):
                 self.number_moves = self.number_moves + 1
                 block.right()
-                # self.update_board()
-                # self.update_blocks()
                 self.update_blocks()
                 self.update_board()
                 return True
