@@ -73,42 +73,7 @@ def get_game_moves(game):
     return ret
 
 """
-Depth-first search
-"""
-# TODO: NOT DONE YET
-def dfs(game):
-    visited = []
-    path = []
-    leafs = PriorityQueue()
-    leafs.put((0, game, path, visited))
-
-    while not leafs.empty():
-        _, current_game, path, visited = leafs.get()
-
-        if current_game.finished:
-            return path
-
-        visited = visited + [current_game]
-
-        # If not goal, get its child nodes
-        child_nodes = {}
-
-        # 4. Add child nodes to the leafs if they haven't been visited yet
-        for node in child_nodes:
-            if node not in visited:
-                if node == goal:
-                    return path + [node]
-                depth_of_node = len(path)
-                # The priority queue prioritises lower values over higher ones (i.e. 1 is prioritised higher than 10)
-                # Since we are using depth of node as our prioritisation measure we need to pass in negative priorities
-                # To ensure that nodes with greater depth get explored before shallower ones
-                leafs.put((-depth_of_node, node, path + [node], visited + [node]))
-
-    return path
-
-
-"""
-Breadth-first search
+Breadth-First Search
 """
 # Retorna [ [coords de uma peça de um bloco, movimento], ... ]
 def bfs(game) :
@@ -141,6 +106,40 @@ def bfs(game) :
     print('No solutions found')
     return []
 
+# TODO:
+"""
+Depth-First Search
+"""
+def dfs(game):
+    visited = []
+    path = []
+    leafs = PriorityQueue()
+    leafs.put((0, game, path, visited))
+
+    while not leafs.empty():
+        _, current_game, path, visited = leafs.get()
+
+        if current_game.finished:
+            return path
+
+        visited = visited + [current_game]
+
+        # If not goal, get its child nodes
+        child_nodes = {}
+
+        # 4. Add child nodes to the leafs if they haven't been visited yet
+        for node in child_nodes:
+            if node not in visited:
+                if node == goal:
+                    return path + [node]
+                depth_of_node = len(path)
+                # The priority queue prioritises lower values over higher ones (i.e. 1 is prioritised higher than 10)
+                # Since we are using depth of node as our prioritisation measure we need to pass in negative priorities
+                # To ensure that nodes with greater depth get explored before shallower ones
+                leafs.put((-depth_of_node, node, path + [node], visited + [node]))
+
+    return path
+
 """
 A* Algorithm
 """
@@ -169,6 +168,28 @@ def astar(game):
     # path[0] tem o valor da heuristica do node
     return path[2]
 
+# TODO:
+"""
+Greedy Search
+"""
+def greedy(game):
+    print('greedy')
+
+# TODO:
+"""
+Uniform Cost Search
+"""
+def ucs(game):
+    print('ucs')
+
+# TODO:
+"""
+Iterative Depth Search
+"""
+def iterative(game):
+    print('iterative')
+
+
 def get_computer_path(game) :
     # return(bfs(game))
     return astar(game)
@@ -184,3 +205,9 @@ def get_computer_path(game) :
 #         [4,4,0,0]]
 # g = Game(board, 1)
 # print(astar(g))
+
+
+
+# pesquisa em largura, pesquisa em profundidade, aprofundamento progressivo, pesquisa de custo
+# uniforme, pesquisa gulosa e algoritmo A*, com configurações diversas (diferentes modos de
+# representação do problema e diferentes heurísticas)
