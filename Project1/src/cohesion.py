@@ -7,7 +7,7 @@ import pygame
 import json
 from game import Game
 from settings import *
-from logic import computer_move, get_computer_path
+from logic import get_computer_path
 
 levels = []
 
@@ -146,6 +146,7 @@ def computer_game_loop():
             if event.type == pygame.QUIT:
                 run = False
         
+        # TODO: improve this stupid loop
         # loop to do moves from path
         if (m % 110) == 0:
             if n < len(path):

@@ -40,37 +40,6 @@ def heuristic(board) :
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
-
-def dfs(game):
-    visited = []
-    path = []
-    leafs = PriorityQueue()
-    leafs.put((0, game, path, visited))
-
-    while not leafs.empty():
-        _, current_game, path, visited = leafs.get()
-
-        if current_game.finished:
-            return path
-
-        visited = visited + [current_game]
-
-        # If not goal, get its child nodes
-        child_nodes = {}
-
-        # 4. Add child nodes to the leafs if they haven't been visited yet
-        for node in child_nodes:
-            if node not in visited:
-                if node == goal:
-                    return path + [node]
-                depth_of_node = len(path)
-                # The priority queue prioritises lower values over higher ones (i.e. 1 is prioritised higher than 10)
-                # Since we are using depth of node as our prioritisation measure we need to pass in negative priorities
-                # To ensure that nodes with greater depth get explored before shallower ones
-                leafs.put((-depth_of_node, node, path + [node], visited + [node]))
-
-    return path
-
 # Retorna [ ([coordenadas_da_primeira_peça_do_block, direção], [novo_board_gerado]), ... ]
 def get_game_moves(game):
     temp_game = deepcopy(game)
@@ -103,6 +72,44 @@ def get_game_moves(game):
 
     return ret
 
+"""
+Depth-first search
+"""
+# TODO: NOT DONE YET
+def dfs(game):
+    visited = []
+    path = []
+    leafs = PriorityQueue()
+    leafs.put((0, game, path, visited))
+
+    while not leafs.empty():
+        _, current_game, path, visited = leafs.get()
+
+        if current_game.finished:
+            return path
+
+        visited = visited + [current_game]
+
+        # If not goal, get its child nodes
+        child_nodes = {}
+
+        # 4. Add child nodes to the leafs if they haven't been visited yet
+        for node in child_nodes:
+            if node not in visited:
+                if node == goal:
+                    return path + [node]
+                depth_of_node = len(path)
+                # The priority queue prioritises lower values over higher ones (i.e. 1 is prioritised higher than 10)
+                # Since we are using depth of node as our prioritisation measure we need to pass in negative priorities
+                # To ensure that nodes with greater depth get explored before shallower ones
+                leafs.put((-depth_of_node, node, path + [node], visited + [node]))
+
+    return path
+
+
+"""
+Breadth-first search
+"""
 # Retorna [ [coords de uma peça de um bloco, movimento], ... ]
 def bfs(game) :
     visited = []
@@ -134,17 +141,46 @@ def bfs(game) :
     print('No solutions found')
     return []
 
+"""
+A* Algorithm
+"""
+# Retorna [ [coords de uma peça de um bloco, movimento], ... ]
+def astar(game):
+    path = []
+    front = [[heuristic(game.board), game, path]]
+    visited = []
+    while front:
+        i = 0
+        for j in range(1, len(front)):
+            if front[i][0] > front[j][0]:
+                i = j
+        path = front[i]
+        front = front[:i] + front[i+1:]
+        endnode = path[1]
+        if endnode.is_finished():
+            break
+        if endnode in visited: continue
+        for move, new_game in get_game_moves(endnode):
+            if new_game in visited: continue
+            new_path = path[2] + [move]
+            new_node = [path[0] + heuristic(new_game.board) - heuristic(endnode.board), new_game, new_path]
+            front.append(new_node)
+            visited.append(endnode)
+    # path[0] tem o valor da heuristica do node
+    return path[2]
+
 def get_computer_path(game) :
-    return bfs(game)
+    # return(bfs(game))
+    return astar(game)
 
 # To test:
-# board = [[1,2,2,1],
+# board = [[1,0,0,1],
 #         [3,1,1,3],
-#         [2,3,3,2],
-#         [4,1,2,4]]
+#         [0,3,3,0],
+#         [4,0,0,4]]
 # board = [[1,0,0,0],
 #         [0,1,1,0],
 #         [0,3,3,0],
 #         [4,4,0,0]]
 # g = Game(board, 1)
-# print(bfs(g))
+# print(astar(g))
