@@ -14,3 +14,9 @@ class Node:
             return self.game == other.game
         else:
             return False
+
+    def __lt__(self, other):
+        return False
+
+    def __repr__(self):
+        return self.game

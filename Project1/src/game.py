@@ -128,5 +128,5 @@ class Game:
 
         return False
 
-    def __eq__(self, other):
-        return self.board == other.board
+    # def __eq__(self, other):
+    #     return self.board == other.board

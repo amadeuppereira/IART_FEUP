@@ -1,7 +1,7 @@
 import math
 from game import Game
 from node import Node
-# from queue import PriorityQueue
+import queue as Q
 from copy import deepcopy
 
 def getPiecesPositionsByColor(board):
@@ -144,30 +144,33 @@ def dfs(game):
 """
 A* Algorithm
 """
-# Retorna [ [coords de uma peça de um bloco, movimento], ... ]
 def astar(game):
     path = []
-    front = [[heuristic(game.board), game, path]]
+    queue = [[heuristic(game.board), game, path]]
     visited = []
-    while front:
+    while queue:
         i = 0
-        for j in range(1, len(front)):
-            if front[i][0] > front[j][0]:
+        for j in range(1, len(queue)):
+            if queue[i][0] > queue[j][0]:
                 i = j
-        path = front[i]
-        front = front[:i] + front[i+1:]
-        endnode = path[1]
-        if endnode.is_finished():
+        
+        previous_heuristic = queue[i][0]
+        game = queue[i][1]
+        path = queue[i][2]
+        queue = queue[:i] + queue[i+1:]
+
+        if game.is_finished():
             break
-        if endnode in visited: continue
-        for move, new_game in get_game_moves(endnode):
+        if game in visited: continue
+        for move, new_game in get_game_moves(game):
             if new_game in visited: continue
-            new_path = path[2] + [move]
-            new_node = [path[0] + heuristic(new_game.board) - heuristic(endnode.board), new_game, new_path]
-            front.append(new_node)
-            visited.append(endnode)
-    # path[0] tem o valor da heuristica do node
-    return path[2]
+            new_path = path + [move]
+            new_node = [previous_heuristic + heuristic(new_game.board) - heuristic(game.board), new_game, new_path]
+            queue.append(new_node)
+            visited.append(game)
+
+    return path  
+
 
 # TODO:
 """
@@ -176,12 +179,36 @@ Greedy Search
 def greedy(game):
     print('greedy')
 
-# TODO:
 """
 Uniform Cost Search
 """
 def ucs(game):
-    print('ucs')
+    path = []
+    queue = [[0, game, path]]
+    visited = []
+    while queue:
+        i = 0
+        for j in range(1, len(queue)):
+            if queue[i][0] > queue[j][0]:
+                i = j
+        
+        cost = queue[i][0]
+        game = queue[i][1]
+        path = queue[i][2]
+        queue = queue[:i] + queue[i+1:]
+
+        if game.is_finished():
+            break
+        if game in visited: continue
+        for move, new_game in get_game_moves(game):
+            if new_game in visited: continue
+            new_path = path + [move]
+            # Only add 1 to cost because each move only costs 1 
+            new_node = [cost + 1, new_game, new_path]
+            queue.append(new_node)
+            visited.append(game)
+
+    return path 
 
 """
 Iterative Depth Search
@@ -221,19 +248,21 @@ def iterative_depth(game, limit):
 
 def get_computer_path(game) :
     # return bfs(game)
-    # return astar(game)
+    a = astar(game)
+    print(a)
+    return a
     # return dfs(game)
-    return iterative_depth(game, 3)
+    # return iterative_depth(game, 3)
 
 
 
 
 # To test:
 import time
-board = [[1,0,0,0],
-        [0,1,1,0],
-        [0,3,3,0],
-        [4,4,0,0]]
+# board = [[1,0,0,0],
+#         [0,1,1,0],
+#         [0,3,3,0],
+#         [4,4,0,0]]
 # board = [[1,0,0,1],
 #         [3,1,1,3],
 #         [0,3,3,0],
@@ -242,14 +271,43 @@ board = [[1,0,0,0],
 #         [0,2,1,1],
 #         [1,1,2,0],
 #         [0,0,1,1]]
-# board = [[1,1,0,2],
-#         [3,3,3,0],
-#         [3,3,3,1],
-#         [0,2,1,0]]
+board = [[1,1,0,2],
+        [3,3,3,0],
+        [3,3,3,1],
+        [0,2,1,0]]
 g = Game(board, 1)
 start_time = time.time()
-print(iterative_depth(g, 3))
+print(ucs(g))
 print(time.time() - start_time)
+
+
+
+
+
+# queue = Q.PriorityQueue()
+# a = Node("node1")
+# b = Node("node2")
+# c = Node("node3")
+# d = Node("node4")
+# e = Node("node5")
+# f = Node("node6")
+# g = Node("node7")
+# h = Node("node8")
+
+# queue.put((0, 1))
+# queue.put((0, 0))
+# queue.put((0, a)) #1
+# queue.put((0, c)) #3
+# queue.put((1, d)) #4
+# queue.put((1, h)) #8
+# queue.put((0, g)) #7
+# queue.put((1, e)) #5
+# queue.put((0, b)) #2
+# queue.put((0, f)) #6
+
+
+# while not queue.empty():
+#     print(queue.get())
 
 
 
