@@ -120,26 +120,7 @@ def dfs(game):
     while len(queue) != 0:
         child_nodes = []
 
-        # for queue_item in queue :
-        #     game = queue_item[0]
-        #     path = queue_item[1]
-
-        #     if game.is_finished():
-        #         return path
-
-        #     new_moves = get_game_moves(game)
-            
-        #     for move, new_game in new_moves:
-        #         if new_game not in visited:
-        #             new_path = path + [move]
-        #             child_nodes.append([new_game, new_path])
-        #             visited.append(game)
-        
-        # # Appending new nodes to the start of the list
-        # queue = child_nodes + queue
-
         queue_item = queue[0]
-        print(queue_item)
         game = queue_item[0]
         path = queue_item[1]
 
@@ -155,7 +136,7 @@ def dfs(game):
                 visited.append(game)
         
         # Appending new nodes to the start of the list
-        queue = child_nodes + queue
+        queue = child_nodes + queue[1:]
     
     print('No solutions found')
     return []
@@ -208,38 +189,39 @@ Iterative Depth Search
 """
 def iterative(game):
     limit = 2
-    # visited = []
-    # path = []
-    # queue = [[game, path]]
+    visited = []
+    path = []
+    queue = [[game, path]]
 
-    # while len(queue) != 0:
-    #     child_nodes = []
-
-    #     for queue_item in queue :
-    #         game = queue_item[0]
-    #         path = queue_item[1]
-
-    #         if game.is_finished():
-    #             return path
-
-    #         new_moves = get_game_moves(game)
+    while len(queue) != 0:
+        for i in range(limit) :
+            child_nodes = []
             
-    #         for move, new_game in new_moves:
-    #             if new_game not in visited:
-    #                 new_path = path + [move]
-    #                 child_nodes.append([new_game, new_path])
-    #                 visited.append(game)
-        
-    #     # Appending new nodes to the start of the list
-    #     queue = child_nodes + queue
+            game = queue_item[0]
+            path = queue_item[1]
+
+            if game.is_finished():
+                return path
+
+            new_moves = get_game_moves(game)
+            
+            for move, new_game in new_moves:
+                if new_game not in visited:
+                    new_path = path + [move]
+                    child_nodes.append([new_game, new_path])
+                    visited.append(game)
+            
+            # Appending new nodes to the start of the list
+            queue = child_nodes + queue
     
-    # print('No solutions found')
-    # return []
+    print('No solutions found')
+    return []
 
 
 def get_computer_path(game) :
-    # return(bfs(game))
-    return astar(game)
+    # return bfs(game)
+    # return astar(game)
+    return dfs(game)
 
 
 
@@ -250,18 +232,18 @@ import time
 #         [0,1,1,0],
 #         [0,3,3,0],
 #         [4,4,0,0]]
-board = [[1,0,0,1],
-        [3,1,1,3],
-        [0,3,3,0],
-        [4,0,0,4]]
+# board = [[1,0,0,1],
+#         [3,1,1,3],
+#         [0,3,3,0],
+#         [4,0,0,4]]
 # board = [[1,1,2,0],
 #         [0,2,1,1],
 #         [1,1,2,0],
 #         [0,0,1,1]]
-# board = [[1,1,0,2],
-#         [3,3,3,0],
-#         [3,3,3,1],
-#         [0,2,1,0]]
+board = [[1,1,0,2],
+        [3,3,3,0],
+        [3,3,3,1],
+        [0,2,1,0]]
 g = Game(board, 1)
 start_time = time.time()
 print(dfs(g))
