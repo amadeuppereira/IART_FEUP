@@ -44,35 +44,27 @@ def heuristic(board) :
 
 
 # Returns all the available moves for the game passed by parameter
-# [ ([coords from one piece of a block, movement direction], [new board generated]), ... ]
+# [ ([block index, movement direction], new game), ... ]
 def get_game_moves(game):
     temp_game = deepcopy(game)
     ret = []
 
-    for block in game.blocks:
-        temp_game = deepcopy(game)
-        temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
-        temp_coords = temp_block.coords[0][:]
-
-        if temp_game.move(temp_block, "up"):
-            ret.append(([temp_coords, "up"], temp_game))
+    for i in range(len(game.blocks)):
+        if temp_game.move(temp_game.blocks[i], "up"):
+            ret.append(([i, "up"], temp_game))
             temp_game = deepcopy(game)
-            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
 
-        if temp_game.move(temp_block, "down"):
-            ret.append(([temp_coords, "down"], temp_game))
+        if temp_game.move(temp_game.blocks[i], "down"):
+            ret.append(([i, "down"], temp_game))
             temp_game = deepcopy(game)
-            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
-
-        if temp_game.move(temp_block, "left"):
-            ret.append(([temp_coords, "left"], temp_game))
+        
+        if temp_game.move(temp_game.blocks[i], "left"):
+            ret.append(([i, "left"], temp_game))
             temp_game = deepcopy(game)
-            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
-
-        if temp_game.move(temp_block, "right"):
-            ret.append(([temp_coords, "right"], temp_game))
+        
+        if temp_game.move(temp_game.blocks[i], "right"):
+            ret.append(([i, "right"], temp_game))
             temp_game = deepcopy(game)
-            temp_block = temp_game.get_block(block.coords[0][0], block.coords[0][1])
 
     return ret
 
@@ -81,7 +73,7 @@ def get_game_moves(game):
 #                                ALGORITHMS
 # ----------------------------------------------------------------------------------
 # all return path
-# path = [ [coords from one piece of a block, movement direction], ... ]
+# path = [ [block index, movement direction], ... ]
 
 """
 Breadth-First Search
@@ -184,7 +176,6 @@ def greedy(game):
     queue = [heuristic(game.board), game, path]
     visited = []
     while queue:
-        previous_heuristic = queue[0]
         game = queue[1]
         path = queue[2]
         
@@ -292,9 +283,9 @@ def get_computer_path(game) :
 # To test:
 # import time
 # board = [[1,0,0,0],
-#         [0,1,1,0],
-#         [0,3,3,0],
-#         [4,4,0,0]]
+#          [0,1,1,0],
+#          [0,3,3,0],
+#          [4,4,0,0]]
 # board = [[1,0,0,1],
 #         [3,1,1,3],
 #         [0,3,3,0],

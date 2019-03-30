@@ -150,9 +150,9 @@ def computer_game_loop():
         # loop to do moves from path
         if (m % 110) == 0:
             if n < len(path):
-                coords = path[n][0]
+                index = path[n][0]
                 move = path[n][1]
-                block = game.get_block(coords[0], coords[1])
+                block = game.blocks[index]
                 game.move(block, move)
                 n = n+1
         m = m+1

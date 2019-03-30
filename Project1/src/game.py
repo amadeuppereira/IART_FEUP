@@ -4,7 +4,6 @@ import time
 class Game:
 
     def __init__(self, board, level = 1):
-        print("----- LEVEL " + str(level) + " -----")
         self.board = board
         self.generateBlocks()
         self.finished = False
@@ -126,6 +125,3 @@ class Game:
                 return True
 
         return False
-
-    # def __eq__(self, other):
-    #     return self.board == other.board
