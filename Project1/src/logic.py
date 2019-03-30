@@ -300,5 +300,10 @@ def get_computer_path(game) :
 #         [0,2,1,0]]
 # g = Game(board, 1)
 # start_time = time.time()
+# print(bfs(g))
+# print(dfs(g))
+# print(astar(g))
+# print(iterative_depth(g, 3))
+# print(ucs(g))
 # print(greedy(g))
 # print(time.time() - start_time)
