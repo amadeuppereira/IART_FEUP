@@ -1,6 +1,5 @@
 import math
 from game import Game
-from node import Node
 import queue as Q
 from copy import deepcopy
 
@@ -37,6 +36,12 @@ def heuristic(board) :
     for key, value in pieces.items():
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
+
+
+
+# TODO: Do another heuristic function
+
+
 
 # Returns all the available moves for the game passed by parameter
 # [ ([coords from one piece of a block, movement direction], [new board generated]), ... ]
@@ -86,7 +91,7 @@ def bfs(game) :
     queue = [[game, path]]
     visited = []
     
-    while len(queue) != 0:
+    while queue:
         new_queue = []
 
         for queue_item in queue :
@@ -117,7 +122,7 @@ def dfs(game):
     path = []
     queue = [[game, path]]
 
-    while len(queue) != 0:
+    while queue:
         child_nodes = []
 
         queue_item = queue[0]
@@ -171,13 +176,39 @@ def astar(game):
 
     return path  
 
-
-# TODO:
 """
 Greedy Search
 """
 def greedy(game):
-    print('greedy')
+    path = []
+    queue = [heuristic(game.board), game, path]
+    visited = []
+    while queue:
+        previous_heuristic = queue[0]
+        game = queue[1]
+        path = queue[2]
+        
+        best_child = []
+
+        if game.is_finished():
+            return path
+
+        if game in visited: continue
+        for move, new_game in get_game_moves(game):
+            if new_game in visited: continue
+            new_path = path + [move]
+            new_node = [heuristic(new_game.board), new_game, new_path]
+            visited.append(game)
+            if best_child:
+                if best_child[0] > new_node[0]:
+                    best_child = new_node
+            else:
+                best_child = new_node
+
+        queue = best_child
+
+    print('No solutions found')
+    return []
 
 """
 Uniform Cost Search
@@ -218,7 +249,7 @@ def iterative_depth(game, limit):
     path = []
     queue = [[0, game, path]]
 
-    while len(queue) != 0:
+    while queue:
         child_nodes = []
         
         queue_item = queue[0]
@@ -246,19 +277,20 @@ def iterative_depth(game, limit):
     return []
 
 
+# COMPUTER MOVE: call algorithms and return path
 def get_computer_path(game) :
     # return bfs(game)
-    a = astar(game)
-    print(a)
-    return a
+    return astar(game)
     # return dfs(game)
     # return iterative_depth(game, 3)
+    # return ucs(game)
+    # return greedy(game)
 
 
 
 
 # To test:
-import time
+# import time
 # board = [[1,0,0,0],
 #         [0,1,1,0],
 #         [0,3,3,0],
@@ -271,46 +303,11 @@ import time
 #         [0,2,1,1],
 #         [1,1,2,0],
 #         [0,0,1,1]]
-board = [[1,1,0,2],
-        [3,3,3,0],
-        [3,3,3,1],
-        [0,2,1,0]]
-g = Game(board, 1)
-start_time = time.time()
-print(ucs(g))
-print(time.time() - start_time)
-
-
-
-
-
-# queue = Q.PriorityQueue()
-# a = Node("node1")
-# b = Node("node2")
-# c = Node("node3")
-# d = Node("node4")
-# e = Node("node5")
-# f = Node("node6")
-# g = Node("node7")
-# h = Node("node8")
-
-# queue.put((0, 1))
-# queue.put((0, 0))
-# queue.put((0, a)) #1
-# queue.put((0, c)) #3
-# queue.put((1, d)) #4
-# queue.put((1, h)) #8
-# queue.put((0, g)) #7
-# queue.put((1, e)) #5
-# queue.put((0, b)) #2
-# queue.put((0, f)) #6
-
-
-# while not queue.empty():
-#     print(queue.get())
-
-
-
-# pesquisa em largura, pesquisa em profundidade, aprofundamento progressivo, pesquisa de custo
-# uniforme, pesquisa gulosa e algoritmo A*, com configurações diversas (diferentes modos de
-# representação do problema e diferentes heurísticas)
+# board = [[1,1,0,2],
+#         [3,3,3,0],
+#         [3,3,3,1],
+#         [0,2,1,0]]
+# g = Game(board, 1)
+# start_time = time.time()
+# print(greedy(g))
+# print(time.time() - start_time)

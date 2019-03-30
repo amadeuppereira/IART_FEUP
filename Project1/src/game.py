@@ -1,6 +1,5 @@
 from block import Block
 import time
-from node import Node
 
 class Game:
 
