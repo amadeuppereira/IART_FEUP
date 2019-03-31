@@ -327,35 +327,35 @@ def get_computer_path(game, alg, max_depth = 3) :
         return (path, [time.time() - start_time, mem])
 
  
-def greedy1(game):
-    path = []
-    queue = [heuristic1(game), game, path]
-    visited = []
-    while queue:
-        game = queue[1]
-        path = queue[2]
+# def greedy1(game):
+#     path = []
+#     queue = [heuristic1(game), game, path]
+#     visited = []
+#     while queue:
+#         game = queue[1]
+#         path = queue[2]
         
-        best_child = []
+#         best_child = []
 
-        if game.is_finished():
-            return path
+#         if game.is_finished():
+#             return path
 
-        if game in visited: continue
-        for move, new_game in get_game_moves(game):
-            if new_game in visited: continue
-            new_path = path + [move]
-            new_node = [heuristic1(new_game), new_game, new_path]
-            visited.append(game)
-            if best_child:
-                if best_child[0] > new_node[0]:
-                    best_child = new_node
-            else:
-                best_child = new_node
+#         if game in visited: continue
+#         for move, new_game in get_game_moves(game):
+#             if new_game in visited: continue
+#             new_path = path + [move]
+#             new_node = [heuristic1(new_game), new_game, new_path]
+#             visited.append(game)
+#             if best_child:
+#                 if best_child[0] > new_node[0]:
+#                     best_child = new_node
+#             else:
+#                 best_child = new_node
 
-        queue = best_child
+#         queue = best_child
 
-    print('No solutions found')
-    return []
+#     print('No solutions found')
+#     return []
 
 # To test:
 # import time
