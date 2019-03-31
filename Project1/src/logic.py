@@ -46,9 +46,24 @@ def heuristic_1(game) :
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
+
+# Takes in account the pieces distance and the blocks/colors ratio
+def heuristic_2(game) :
+    board = game.board
+    pieces = getPiecesPositionsByColor(board)
+    totalDistances = 0
+    n_colors = 0
+    for _, value in pieces.items():
+        n_colors += 1
+        totalDistances = totalDistances + distance_equal_pieces(value)
+    
+    blocks_color_ratio = len(game.blocks) / n_colors
+
+    return totalDistances * blocks_color_ratio
+
 # Takes in account the pieces distance, the number of available moves
 # and the blocks/colors ratio
-def heuristic_2(game) :
+def heuristic_3(game) :
     board = game.board
     pieces = getPiecesPositionsByColor(board)
     totalDistances = 0
@@ -65,8 +80,13 @@ def heuristic_2(game) :
         if game.is_possible_down(block): n_moves += 1
         if game.is_possible_left(block): n_moves += 1
         if game.is_possible_right(block): n_moves += 1
-            
-    return totalDistances*0.3 + blocks_color_ratio*0.3 + n_moves*0.3
+    
+    if n_moves == 0:
+        n_moves = 100
+    else:
+        n_moves = len(game.blocks) / n_moves
+
+    return totalDistances * blocks_color_ratio + n_moves
     
 
 # ----------------------------------------------------------------------------------
@@ -346,20 +366,24 @@ def get_computer_path(game, alg, max_depth = 3) :
 #         [3,1,1,3],
 #         [0,3,3,0],
 #         [4,0,0,4]]
-board = [[1,1,2,0],
-        [0,2,1,1],
-        [1,1,2,0],
-        [0,0,1,1]]
-# board = [[1,1,0,2],
-#         [3,3,3,0],
-#         [3,3,3,1],
-#         [0,2,1,0]]
+# board = [[1,1,2,0],
+#         [0,2,1,1],
+#         [1,1,2,0],
+#         [0,0,1,1]]
+# board = [[1,2,0,0],
+#         [2,0,0,3],
+#         [0,4,4,2],
+#         [3,2,1,0]]
 g = Game(board, 1)
 start_time = time.time()
 # print(bfs(g))
 # print(dfs(g))
 print(astar(g, heuristic_1))
+print(astar(g, heuristic_2))
+print(astar(g, heuristic_3))
 # print(iterative_depth(g, 3))
 # print(ucs(g))
-# print(greedy(g, heuristic_1))
+print(greedy(g, heuristic_1))
+print(greedy(g, heuristic_2))
+print(greedy(g, heuristic_3))
 print(time.time() - start_time)
