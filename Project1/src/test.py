@@ -15,14 +15,10 @@ medium_board = [[1,1,2,0],
                 [0,0,1,1]]
 
 # Board from an hard level
-hard_board = [[1,2,0,0],
-              [2,0,0,3],
-              [0,4,4,2],
-              [3,2,1,0]]
-
-g = Game(easy_board, 1)
-# g = Game(medium_board, 1)
-# g = Game(hard_board, 1)
+hard_board = [[0,2,2,0],
+              [0,3,4,0],
+              [0,4,3,0],
+              [1,2,2,1]]
 
 # ----------------------------------------------------------------------------------
 #                                BREADTH-FIRST SEARCH
