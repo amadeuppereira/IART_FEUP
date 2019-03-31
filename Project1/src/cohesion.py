@@ -24,6 +24,8 @@ root.geometry(str(DISPLAY_WIDTH) + "x" + str(DISPLAY_HEIGHT))
 root.title("COHESION")
 root.resizable(0,0)
 
+
+
 def handle_click(event): 
     global run
     global block 
@@ -90,21 +92,52 @@ display_game()
 
 
 level_text = tk.StringVar()
-level_text.set('Level: ' + str(LEVEL))
+level_text.set('LEVEL')
 level_label = tk.Label(root,
     textvariable=level_text,
     pady=10,
     wraplength=SIDE_MENU_WIDTH,
     font=("Helvetica", 20))
 level_label.pack()
+level_label.place(relx=0.02)
+
+
+levels_box = tk.Spinbox(root, from_=0, to = len(levels))
+levels_box.pack()
+levels_box.place(height = 25, width = 50, rely = 0.034, relx = 0.15)
+
+
 
 difficulty_text = tk.StringVar()
-difficulty_text.set('Difficulty: ' + GAMEMODE.upper())
+difficulty_text.set("EASY")
 difficulty_label = tk.Label(root,
     textvariable=difficulty_text,
     wraplength=SIDE_MENU_WIDTH,
-    font=("Helvetica", 20))
+    font=("Helvetica", 12))
 difficulty_label.pack()
+difficulty_label.place(relx = 0.13, rely = 0.1, width = 80, height = 40)
+
+var = tk.StringVar()
+def select_mode():
+    select = var.get()
+    global difficulty_text
+    difficulty_text.set(select.upper())
+
+easy_mode = tk.Radiobutton(root, text="EASY", variable=var, value="easy" , indicatoron = 0, command = select_mode)
+easy_mode.pack(anchor = "w")
+easy_mode.place(rely = 0.09, width = 56)
+
+medium_mode = tk.Radiobutton(root, text="MEDIUM", variable=var, value="medium", indicatoron = 0, command = select_mode)
+medium_mode.pack(anchor = "w")
+medium_mode.place(rely = 0.125)
+
+hard_mode = tk.Radiobutton(root, text="HARD", variable=var, value="hard", indicatoron = 0, command = select_mode)
+hard_mode.pack(anchor = "w")
+hard_mode.place(rely = 0.16, width = 56)
+
+
+
+
 
 def next_level_handler():
     global LEVEL
@@ -123,11 +156,16 @@ def next_level_handler():
 
     next_level.config(state="normal")
 
+
+
+
 next_level = tk.Button(root,
     text="Next Level",
     state="disabled",
     command=next_level_handler)
 next_level.pack()
+next_level.place(rely = 0.9 , relx = 0.04, height = 35, width = 140)
+
 
 def start_player():
     global run
@@ -144,6 +182,7 @@ player_button = tk.Button(root,
     text="Play",
     command= start_player)
 player_button.pack()
+player_button.place(rely = 0.45, relx = 0.02, height = 55, width = 170)
 
 def alg_updated(event):
     global depth_input
@@ -168,6 +207,7 @@ algorithm.set(algorithms[0])
 algorithm_op = tk.OptionMenu(root, algorithm, *algorithms, command=alg_updated)
 algorithm_op.config(width=SIDE_MENU_WIDTH)
 algorithm_op.pack()
+algorithm_op.place(rely = 0.6 , relx = 0.02, width = 170)
 
 max_depth = tk.StringVar(root)
 max_depth.set("Max Depth")
@@ -175,6 +215,7 @@ max_depth.set("Max Depth")
 depth_input = tk.Entry(root, textvariable=max_depth)
 depth_input.config(state="disabled")
 depth_input.pack()
+depth_input.place(rely = 0.7 , relx = 0.02, height = 45)
 
 def start_ai():
     global algorithm_op
@@ -225,14 +266,18 @@ solve_button = tk.Button(root,
     padx=50,
     command= start_ai)
 solve_button.pack()
+solve_button.place(rely = 0.8 , relx = 0.04, height = 45)
 
 ai_info = tk.StringVar()
-ai_info.set('')
+ai_info.set('STATS')
 ai_info_label = tk.Label(root,
     textvariable=ai_info,
     wraplength=SIDE_MENU_WIDTH,
-    font=("Helvetica", 20))
+    font=("Helvetica", 20),
+    bg = "black",
+    fg = "green")
 ai_info_label.pack()
+ai_info_label.place(rely = 0.2, relx = 0.005, width = 193)
 
 
 root.mainloop()
