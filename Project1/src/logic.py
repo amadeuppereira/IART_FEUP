@@ -164,9 +164,9 @@ def dfs(game):
 """
 A* Algorithm
 """
-def astar(game):
+def astar(game, heuristic):
     path = []
-    queue = [[heuristic_1(game), game, path]]
+    queue = [[heuristic(game), game, path]]
     visited = []
     mem = 1
 
@@ -187,7 +187,7 @@ def astar(game):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            new_node = [previous_heuristic + heuristic_1(new_game) - heuristic_1(game), new_game, new_path]
+            new_node = [previous_heuristic + heuristic(new_game) - heuristic(game), new_game, new_path]
             queue.append(new_node)
             mem += 1
 
@@ -198,9 +198,9 @@ def astar(game):
 """
 Greedy Search
 """
-def greedy(game):
+def greedy(game, heuristic):
     path = []
-    queue = [heuristic_1(game), game, path]
+    queue = [heuristic(game), game, path]
     visited = []
     mem = 1
 
@@ -217,7 +217,7 @@ def greedy(game):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            new_node = [heuristic_1(new_game), new_game, new_path]
+            new_node = [heuristic(new_game), new_game, new_path]
             if best_child:
                 if best_child[0] > new_node[0]:
                     best_child = new_node
@@ -333,20 +333,20 @@ def get_computer_path(game, alg, max_depth = 3) :
 #         [3,1,1,3],
 #         [0,3,3,0],
 #         [4,0,0,4]]
-# board = [[1,1,2,0],
-#         [0,2,1,1],
-#         [1,1,2,0],
-#         [0,0,1,1]]
+board = [[1,1,2,0],
+        [0,2,1,1],
+        [1,1,2,0],
+        [0,0,1,1]]
 # board = [[1,1,0,2],
 #         [3,3,3,0],
 #         [3,3,3,1],
 #         [0,2,1,0]]
-# g = Game(board, 1)
-# start_time = time.time()
+g = Game(board, 1)
+start_time = time.time()
 # print(bfs(g))
 # print(dfs(g))
-# print(astar(g))
+print(astar(g, heuristic_1))
 # print(iterative_depth(g, 3))
 # print(ucs(g))
-# print(greedy(g))
-# print(time.time() - start_time)
+# print(greedy(g, heuristic_1))
+print(time.time() - start_time)
