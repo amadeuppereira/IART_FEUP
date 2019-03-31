@@ -1,7 +1,6 @@
 import math
 from game import Game
 from copy import deepcopy
-import time
 
 # Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
@@ -357,33 +356,3 @@ def get_computer_path(game, alg, max_depth = 3) :
     elif alg == "iterative depth":
         path, mem = iterative_depth(game, max_depth)
         return (path, [time.time() - start_time, mem])
-
-
-
-# To test:
-# import time
-# board = [[1,0,0,1],
-#         [3,1,1,3],
-#         [0,3,3,0],
-#         [4,0,0,4]]
-# board = [[1,1,2,0],
-#         [0,2,1,1],
-#         [1,1,2,0],
-#         [0,0,1,1]]
-# board = [[1,2,0,0],
-#         [2,0,0,3],
-#         [0,4,4,2],
-#         [3,2,1,0]]
-g = Game(board, 1)
-start_time = time.time()
-# print(bfs(g))
-# print(dfs(g))
-print(astar(g, heuristic_1))
-print(astar(g, heuristic_2))
-print(astar(g, heuristic_3))
-# print(iterative_depth(g, 3))
-# print(ucs(g))
-print(greedy(g, heuristic_1))
-print(greedy(g, heuristic_2))
-print(greedy(g, heuristic_3))
-print(time.time() - start_time)
