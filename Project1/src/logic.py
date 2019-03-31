@@ -312,10 +312,6 @@ def get_computer_path(game, alg, max_depth = 3) :
 
 # To test:
 # import time
-# board = [[1,0,0,0],
-#          [0,1,1,0],
-#          [0,3,3,0],
-#          [4,4,0,0]]
 # board = [[1,0,0,1],
 #         [3,1,1,3],
 #         [0,3,3,0],
