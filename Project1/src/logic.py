@@ -1,6 +1,7 @@
 import math
 from game import Game
 from copy import deepcopy
+import time
 
 # Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
