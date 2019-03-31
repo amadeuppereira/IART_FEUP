@@ -1,9 +1,9 @@
 import math
 from game import Game
-import queue as Q
 from copy import deepcopy
 import time
 
+# Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
     pieces = {}
     for j in range(len(board)):
@@ -15,9 +15,11 @@ def getPiecesPositionsByColor(board):
                     pieces[board[i][j]] = [[i, j]]
     return pieces
 
+# Returns the distance between two points by their coordinates
 def distance_between_points(x1,y1,x2,y2) :
     return math.sqrt( (x2 - x1)**2 + (y2 - y1)**2)
 
+# Return the sum of all the distances between pieces of the same color
 def distance_equal_pieces(piecesCoords) :
     totalDistance = 0
     for i in range(len(piecesCoords)):
@@ -30,19 +32,66 @@ def distance_equal_pieces(piecesCoords) :
             j = j+1
     return totalDistance
 
+
+# ----------------------------------------------------------------------------------
+#                                HEURISTICS
+# ----------------------------------------------------------------------------------
+
 # Returns the sum of all distances between pieces of the same color
-def heuristic(board) :
+def heuristic_1(game) :
+    board = game.board
     pieces = getPiecesPositionsByColor(board)
     totalDistances = 0
-    for key, value in pieces.items():
+    for _, value in pieces.items():
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
 
+# Takes in account the pieces distance and the blocks/colors ratio
+def heuristic_2(game) :
+    board = game.board
+    pieces = getPiecesPositionsByColor(board)
+    totalDistances = 0
+    n_colors = 0
+    for _, value in pieces.items():
+        n_colors += 1
+        totalDistances = totalDistances + distance_equal_pieces(value)
+    
+    blocks_color_ratio = len(game.blocks) / n_colors
 
-# TODO: Do another heuristic function
+    return totalDistances * blocks_color_ratio
 
+# Takes in account the pieces distance, the number of available moves
+# and the blocks/colors ratio
+def heuristic_3(game) :
+    board = game.board
+    pieces = getPiecesPositionsByColor(board)
+    totalDistances = 0
+    n_colors = 0
+    for _, value in pieces.items():
+        n_colors += 1
+        totalDistances = totalDistances + distance_equal_pieces(value)
+    
+    blocks_color_ratio = len(game.blocks) / n_colors
 
+    n_moves = 0
+    for block in game.blocks:
+        if game.is_possible_up(block): n_moves += 1
+        if game.is_possible_down(block): n_moves += 1
+        if game.is_possible_left(block): n_moves += 1
+        if game.is_possible_right(block): n_moves += 1
+    
+    if n_moves == 0:
+        n_moves = 100
+    else:
+        n_moves = len(game.blocks) / n_moves
+
+    return totalDistances * blocks_color_ratio + n_moves
+    
+
+# ----------------------------------------------------------------------------------
+#                                GAME MOVES
+# ----------------------------------------------------------------------------------
 
 # Returns all the available moves for the game passed by parameter
 # [ ([block index, movement direction], new game), ... ]
@@ -73,8 +122,9 @@ def get_game_moves(game):
 # ----------------------------------------------------------------------------------
 #                                ALGORITHMS
 # ----------------------------------------------------------------------------------
-# all return path
+# All return [path, mem]
 # path = [ [block index, movement direction], ... ]
+# mem = number of nodes saved in memory
 
 """
 Breadth-First Search
@@ -101,8 +151,9 @@ def bfs(game) :
                 if new_game not in visited:
                     new_path = path + [move]
                     new_queue.append([new_game, new_path])
-                    visited.append(game)
                     mem += 1
+            
+            visited.append(game)
         
         queue = new_queue
 
@@ -133,8 +184,9 @@ def dfs(game):
             if new_game not in visited:
                 new_path = path + [move]
                 child_nodes.append([new_game, new_path])
-                visited.append(game)
                 mem += 1
+        
+        visited.append(game)
         
         # Appending new nodes to the start of the list
         queue = child_nodes + queue[1:]
@@ -144,9 +196,9 @@ def dfs(game):
 """
 A* Algorithm
 """
-def astar(game):
+def astar(game, heuristic):
     path = []
-    queue = [[heuristic(game.board), game, path]]
+    queue = [[heuristic(game), game, path]]
     visited = []
     mem = 1
 
@@ -167,19 +219,20 @@ def astar(game):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            new_node = [previous_heuristic + heuristic(new_game.board) - heuristic(game.board), new_game, new_path]
+            new_node = [previous_heuristic + heuristic(new_game) - heuristic(game), new_game, new_path]
             queue.append(new_node)
-            visited.append(game)
             mem += 1
+
+        visited.append(game)
 
     return ([], mem)  
 
 """
 Greedy Search
 """
-def greedy(game):
+def greedy(game, heuristic):
     path = []
-    queue = [heuristic(game.board), game, path]
+    queue = [heuristic(game), game, path]
     visited = []
     mem = 1
 
@@ -196,8 +249,7 @@ def greedy(game):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            new_node = [heuristic(new_game.board), new_game, new_path]
-            visited.append(game)
+            new_node = [heuristic(new_game), new_game, new_path]
             if best_child:
                 if best_child[0] > new_node[0]:
                     best_child = new_node
@@ -205,6 +257,7 @@ def greedy(game):
                 best_child = new_node
             mem += 1
 
+        visited.append(game)
         queue = best_child
 
     return ([], mem)
@@ -238,8 +291,9 @@ def ucs(game):
             # Only add 1 to cost because each move only costs 1 
             new_node = [cost + 1, new_game, new_path]
             queue.append(new_node)
-            visited.append(game)
             mem += 1
+
+        visited.append(game)
 
     return ([], mem) 
 
@@ -269,8 +323,9 @@ def iterative_depth(game, limit):
             if new_game not in visited:
                 new_path = path + [move]
                 child_nodes.append([new_depth, new_game, new_path])
-                visited.append(game)
                 mem += 1
+        
+        visited.append(game)
         
         if new_depth % limit == 0:
             queue = queue[1:] + child_nodes
@@ -280,7 +335,7 @@ def iterative_depth(game, limit):
     return ([], mem)
 
 
-# COMPUTER MOVE: call algorithms and return path
+# COMPUTER MOVE: calls algorithms and returns path
 def get_computer_path(game, alg, max_depth = 3) :
     start_time = time.time()
 
@@ -291,10 +346,10 @@ def get_computer_path(game, alg, max_depth = 3) :
         path, mem = dfs(game)
         return (path, [time.time() - start_time, mem])
     elif alg == "a*":
-        path, mem = astar(game)
+        path, mem = astar(game, heuristic_1)
         return (path, [time.time() - start_time, mem])
     elif alg == "greedy":
-        path, mem = greedy(game)
+        path, mem = greedy(game, heuristic_1)
         return (path, [time.time() - start_time, mem])
     elif alg == "ucs":
         path, mem = ucs(game)
