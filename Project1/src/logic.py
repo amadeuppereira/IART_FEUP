@@ -2,6 +2,7 @@ import math
 from game import Game
 import queue as Q
 from copy import deepcopy
+import time
 
 def getPiecesPositionsByColor(board):
     pieces = {}
@@ -33,15 +34,34 @@ def distance_equal_pieces(piecesCoords) :
 def heuristic(board) :
     pieces = getPiecesPositionsByColor(board)
     totalDistances = 0
-    for key, value in pieces.items():
+    for _, value in pieces.items():
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
+# Takes in account the pieces distance, the number of available moves
+# and the blocks/colors ratio
+def heuristic1(game) :
+    board = game.board
+    pieces = getPiecesPositionsByColor(board)
+    totalDistances = 0
+    n_colors = 0
+    for _, value in pieces.items():
+        n_colors += 1
+        totalDistances = totalDistances + distance_equal_pieces(value)
+    
+    blocks_color_ratio = len(game.blocks) / n_colors
 
+    n_moves = 0
+    for block in game.blocks:
+        if game.is_possible_up(block): n_moves += 1
+        if game.is_possible_down(block): n_moves += 1
+        if game.is_possible_left(block): n_moves += 1
+        if game.is_possible_right(block): n_moves += 1
+            
+    return totalDistances*0.3 + blocks_color_ratio*0.3 + n_moves*0.3
+    
 
-# TODO: Do another heuristic function
-
-
+    
 
 # Returns all the available moves for the game passed by parameter
 # [ ([block index, movement direction], new game), ... ]
@@ -277,8 +297,36 @@ def get_computer_path(game) :
     # return ucs(game)
     # return greedy(game)
 
+ 
+def greedy1(game):
+    path = []
+    queue = [heuristic1(game), game, path]
+    visited = []
+    while queue:
+        game = queue[1]
+        path = queue[2]
+        
+        best_child = []
 
+        if game.is_finished():
+            return path
 
+        if game in visited: continue
+        for move, new_game in get_game_moves(game):
+            if new_game in visited: continue
+            new_path = path + [move]
+            new_node = [heuristic1(new_game), new_game, new_path]
+            visited.append(game)
+            if best_child:
+                if best_child[0] > new_node[0]:
+                    best_child = new_node
+            else:
+                best_child = new_node
+
+        queue = best_child
+
+    print('No solutions found')
+    return []
 
 # To test:
 # import time
@@ -294,16 +342,14 @@ def get_computer_path(game) :
 #         [0,2,1,1],
 #         [1,1,2,0],
 #         [0,0,1,1]]
-# board = [[1,1,0,2],
-#         [3,3,3,0],
-#         [3,3,3,1],
-#         [0,2,1,0]]
-# g = Game(board, 1)
-# start_time = time.time()
-# print(bfs(g))
-# print(dfs(g))
-# print(astar(g))
-# print(iterative_depth(g, 3))
-# print(ucs(g))
-# print(greedy(g))
-# print(time.time() - start_time)
+board = [[1,1,0,2],
+        [3,3,3,0],
+        [3,3,3,1],
+        [0,2,1,0]]
+g = Game(board, 1)
+start_time = time.time()
+greedy(g)
+print(time.time() - start_time)
+start_time = time.time()
+greedy1(g)
+print(time.time() - start_time)
