@@ -3,6 +3,7 @@ from game import Game
 from copy import deepcopy
 import time
 
+# Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
     pieces = {}
     for j in range(len(board)):
@@ -14,9 +15,11 @@ def getPiecesPositionsByColor(board):
                     pieces[board[i][j]] = [[i, j]]
     return pieces
 
+# Returns the distance between two points by their coordinates
 def distance_between_points(x1,y1,x2,y2) :
     return math.sqrt( (x2 - x1)**2 + (y2 - y1)**2)
 
+# Return the sum of all the distances between pieces of the same color
 def distance_equal_pieces(piecesCoords) :
     totalDistance = 0
     for i in range(len(piecesCoords)):
@@ -29,9 +32,15 @@ def distance_equal_pieces(piecesCoords) :
             j = j+1
     return totalDistance
 
+
+# ----------------------------------------------------------------------------------
+#                                HEURISTICS
+# ----------------------------------------------------------------------------------
+
 # Returns the sum of all distances between pieces of the same color
 def heuristic_1(game) :
-    pieces = getPiecesPositionsByColor(game.board)
+    board = game.board
+    pieces = getPiecesPositionsByColor(board)
     totalDistances = 0
     for _, value in pieces.items():
         totalDistances = totalDistances + distance_equal_pieces(value)
@@ -60,7 +69,9 @@ def heuristic_2(game) :
     return totalDistances*0.3 + blocks_color_ratio*0.3 + n_moves*0.3
     
 
-    
+# ----------------------------------------------------------------------------------
+#                                GAME MOVES
+# ----------------------------------------------------------------------------------
 
 # Returns all the available moves for the game passed by parameter
 # [ ([block index, movement direction], new game), ... ]
@@ -91,8 +102,9 @@ def get_game_moves(game):
 # ----------------------------------------------------------------------------------
 #                                ALGORITHMS
 # ----------------------------------------------------------------------------------
-# all return path
+# All return [path, mem]
 # path = [ [block index, movement direction], ... ]
+# mem = number of nodes saved in memory
 
 """
 Breadth-First Search
@@ -303,7 +315,7 @@ def iterative_depth(game, limit):
     return ([], mem)
 
 
-# COMPUTER MOVE: call algorithms and return path
+# COMPUTER MOVE: calls algorithms and returns path
 def get_computer_path(game, alg, max_depth = 3) :
     start_time = time.time()
 
@@ -314,10 +326,10 @@ def get_computer_path(game, alg, max_depth = 3) :
         path, mem = dfs(game)
         return (path, [time.time() - start_time, mem])
     elif alg == "a*":
-        path, mem = astar(game)
+        path, mem = astar(game, heuristic_1)
         return (path, [time.time() - start_time, mem])
     elif alg == "greedy":
-        path, mem = greedy(game)
+        path, mem = greedy(game, heuristic_1)
         return (path, [time.time() - start_time, mem])
     elif alg == "ucs":
         path, mem = ucs(game)
@@ -325,6 +337,7 @@ def get_computer_path(game, alg, max_depth = 3) :
     elif alg == "iterative depth":
         path, mem = iterative_depth(game, max_depth)
         return (path, [time.time() - start_time, mem])
+
 
 
 # To test:
