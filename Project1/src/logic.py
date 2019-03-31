@@ -2,6 +2,7 @@ import math
 from game import Game
 import queue as Q
 from copy import deepcopy
+import time
 
 def getPiecesPositionsByColor(board):
     pieces = {}
@@ -82,6 +83,7 @@ def bfs(game) :
     path = []
     queue = [[game, path]]
     visited = []
+    mem = 1
     
     while queue:
         new_queue = []
@@ -91,7 +93,7 @@ def bfs(game) :
             path = queue_item[1]
 
             if game.is_finished():
-                return path
+                return (path, mem)
 
             new_moves = get_game_moves(game)
             
@@ -100,11 +102,11 @@ def bfs(game) :
                     new_path = path + [move]
                     new_queue.append([new_game, new_path])
                     visited.append(game)
+                    mem += 1
         
         queue = new_queue
 
-    print('No solutions found')
-    return []
+    return ([], mem)
 
 """
 Depth-First Search
@@ -113,6 +115,7 @@ def dfs(game):
     visited = []
     path = []
     queue = [[game, path]]
+    mem = 1
 
     while queue:
         child_nodes = []
@@ -122,7 +125,7 @@ def dfs(game):
         path = queue_item[1]
 
         if game.is_finished():
-            return path
+            return (path, mem)
 
         new_moves = get_game_moves(game)
         
@@ -131,12 +134,12 @@ def dfs(game):
                 new_path = path + [move]
                 child_nodes.append([new_game, new_path])
                 visited.append(game)
+                mem += 1
         
         # Appending new nodes to the start of the list
         queue = child_nodes + queue[1:]
     
-    print('No solutions found')
-    return []
+    return ([], mem)
 
 """
 A* Algorithm
@@ -145,6 +148,8 @@ def astar(game):
     path = []
     queue = [[heuristic(game.board), game, path]]
     visited = []
+    mem = 1
+
     while queue:
         i = 0
         for j in range(1, len(queue)):
@@ -157,7 +162,7 @@ def astar(game):
         queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
-            break
+            return (path, mem)
         if game in visited: continue
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
@@ -165,8 +170,9 @@ def astar(game):
             new_node = [previous_heuristic + heuristic(new_game.board) - heuristic(game.board), new_game, new_path]
             queue.append(new_node)
             visited.append(game)
+            mem += 1
 
-    return path  
+    return ([], mem)  
 
 """
 Greedy Search
@@ -175,6 +181,8 @@ def greedy(game):
     path = []
     queue = [heuristic(game.board), game, path]
     visited = []
+    mem = 1
+
     while queue:
         game = queue[1]
         path = queue[2]
@@ -182,7 +190,7 @@ def greedy(game):
         best_child = []
 
         if game.is_finished():
-            return path
+            return (path, mem)
 
         if game in visited: continue
         for move, new_game in get_game_moves(game):
@@ -195,11 +203,11 @@ def greedy(game):
                     best_child = new_node
             else:
                 best_child = new_node
+            mem += 1
 
         queue = best_child
 
-    print('No solutions found')
-    return []
+    return ([], mem)
 
 """
 Uniform Cost Search
@@ -208,6 +216,8 @@ def ucs(game):
     path = []
     queue = [[0, game, path]]
     visited = []
+    mem = 1
+
     while queue:
         i = 0
         for j in range(1, len(queue)):
@@ -220,7 +230,7 @@ def ucs(game):
         queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
-            break
+            return (path, mem)
         if game in visited: continue
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
@@ -229,8 +239,9 @@ def ucs(game):
             new_node = [cost + 1, new_game, new_path]
             queue.append(new_node)
             visited.append(game)
+            mem += 1
 
-    return path 
+    return ([], mem) 
 
 """
 Iterative Depth Search
@@ -239,6 +250,7 @@ def iterative_depth(game, limit):
     visited = []
     path = []
     queue = [[0, game, path]]
+    mem = 1
 
     while queue:
         child_nodes = []
@@ -249,7 +261,7 @@ def iterative_depth(game, limit):
         path = queue_item[2]
 
         if game.is_finished():
-            return path
+            return (path, mem)
 
         new_moves = get_game_moves(game)
         new_depth = depth + 1
@@ -258,47 +270,35 @@ def iterative_depth(game, limit):
                 new_path = path + [move]
                 child_nodes.append([new_depth, new_game, new_path])
                 visited.append(game)
+                mem += 1
         
         if new_depth % limit == 0:
             queue = queue[1:] + child_nodes
         else:
             queue = child_nodes + queue[1:]
     
-    print('No solutions found')
-    return []
+    return ([], mem)
 
 
 # COMPUTER MOVE: call algorithms and return path
-def get_computer_path(game) :
-    # return bfs(game)
-    return astar(game)
-    # return dfs(game)
-    # return iterative_depth(game, 3)
-    # return ucs(game)
-    # return greedy(game)
+def get_computer_path(game, alg, max_depth = 3) :
+    start_time = time.time()
 
-
-
-
-# To test:
-# import time
-# board = [[1,0,0,0],
-#          [0,1,1,0],
-#          [0,3,3,0],
-#          [4,4,0,0]]
-# board = [[1,0,0,1],
-#         [3,1,1,3],
-#         [0,3,3,0],
-#         [4,0,0,4]]
-# board = [[1,1,2,0],
-#         [0,2,1,1],
-#         [1,1,2,0],
-#         [0,0,1,1]]
-# board = [[1,1,0,2],
-#         [3,3,3,0],
-#         [3,3,3,1],
-#         [0,2,1,0]]
-# g = Game(board, 1)
-# start_time = time.time()
-# print(greedy(g))
-# print(time.time() - start_time)
+    if alg == "bfs":
+        path, mem = bfs(game)
+        return (path, [time.time() - start_time, mem])
+    elif alg == "dfs":
+        path, mem = dfs(game)
+        return (path, [time.time() - start_time, mem])
+    elif alg == "a*":
+        path, mem = astar(game)
+        return (path, [time.time() - start_time, mem])
+    elif alg == "greedy":
+        path, mem = greedy(game)
+        return (path, [time.time() - start_time, mem])
+    elif alg == "ucs":
+        path, mem = ucs(game)
+        return (path, [time.time() - start_time, mem])
+    elif alg == "iterative depth":
+        path, mem = iterative_depth(game, max_depth)
+        return (path, [time.time() - start_time, mem])
