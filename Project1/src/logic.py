@@ -2,6 +2,7 @@ import math
 from game import Game
 from copy import deepcopy
 import time
+import queue as Q
 
 # Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
@@ -200,20 +201,26 @@ A* Algorithm
 """
 def astar(game, heuristic):
     path = []
-    queue = [[heuristic(game), game, path]]
+    # queue = [[heuristic(game), game, path]]
+    queue = Q.PriorityQueue()
+    queue.put([heuristic(game), game, path])
+
     visited = []
     mem = 1
 
     while queue:
-        i = 0
-        for j in range(1, len(queue)):
-            if queue[i][0] > queue[j][0]:
-                i = j
+        # i = 0
+        # for j in range(1, len(queue)):
+        #     if queue[i][0] > queue[j][0]:
+        #         i = j
+        g = queue.get()
         
         # previous_heuristic = queue[i][0]
-        game = queue[i][1]
-        path = queue[i][2]
-        queue = queue[:i] + queue[i+1:]
+        # game = queue[i][1]
+        # path = queue[i][2]
+        # queue = queue[:i] + queue[i+1:]
+        game = g[1]
+        path = g[2]
 
         if game.is_finished():
             return (path, mem)
@@ -223,7 +230,8 @@ def astar(game, heuristic):
             new_path = path + [move]
             # new_node = [previous_heuristic + heuristic(new_game) - heuristic(game), new_game, new_path]
             new_node = [heuristic(new_game) + len(new_path), new_game, new_path]
-            queue.append(new_node)
+            # queue.append(new_node)
+            queue.put(new_node)
             mem += 1
 
         visited.append(game)
