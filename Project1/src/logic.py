@@ -210,7 +210,7 @@ def astar(game, heuristic):
             if queue[i][0] > queue[j][0]:
                 i = j
         
-        previous_heuristic = queue[i][0]
+        # previous_heuristic = queue[i][0]
         game = queue[i][1]
         path = queue[i][2]
         queue = queue[:i] + queue[i+1:]
@@ -221,7 +221,8 @@ def astar(game, heuristic):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            new_node = [previous_heuristic + heuristic(new_game) - heuristic(game), new_game, new_path]
+            # new_node = [previous_heuristic + heuristic(new_game) - heuristic(game), new_game, new_path]
+            new_node = [heuristic(new_game) + len(new_path), new_game, new_path]
             queue.append(new_node)
             mem += 1
 
