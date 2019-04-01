@@ -336,7 +336,14 @@ def iterative_depth(game, limit):
 
 
 # COMPUTER MOVE: calls algorithms and returns path
-def get_computer_path(game, alg, max_depth = 3) :
+def get_computer_path(game, alg, heuristic , max_depth = 3) :
+
+    if heuristic == "heuristic_1": heuristic = heuristic_1
+    elif heuristic == "heuristic_2": heuristic = heuristic_2
+    elif heuristic == "heuristic_3": heuristic = heuristic_3
+
+    print(heuristic)
+
     start_time = time.time()
 
     if alg == "bfs":
@@ -346,10 +353,10 @@ def get_computer_path(game, alg, max_depth = 3) :
         path, mem = dfs(game)
         return (path, [time.time() - start_time, mem])
     elif alg == "a*":
-        path, mem = astar(game, heuristic_1)
+        path, mem = astar(game, heuristic)
         return (path, [time.time() - start_time, mem])
     elif alg == "greedy":
-        path, mem = greedy(game, heuristic_1)
+        path, mem = greedy(game, heuristic)
         return (path, [time.time() - start_time, mem])
     elif alg == "ucs":
         path, mem = ucs(game)
