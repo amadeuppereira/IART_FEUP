@@ -344,8 +344,6 @@ def get_computer_path(game, alg, heuristic , max_depth = 3) :
     elif heuristic == "heuristic_2": heuristic = heuristic_2
     elif heuristic == "heuristic_3": heuristic = heuristic_3
 
-    print(heuristic)
-
     start_time = time.time()
 
     if alg == "bfs":

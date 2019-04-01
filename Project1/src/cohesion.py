@@ -231,6 +231,7 @@ def start_ai():
 
     run = False
     algorithm_op.config(state="disabled")
+    heuristic_op.config(state="disabled")
     player_button.config(state="disabled")
 
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
@@ -247,15 +248,22 @@ def start_ai():
     else:
         ai_info.set("Time: %.5f s\nMemory: %d\nCost: %d" % (stats[0], stats[1], len(path)))
         for n in range(len(path)):
-            time.sleep(1)
             index = path[n][0]
             move = path[n][1]
             block = game.blocks[index]
-            game.move(block, move)
             display_game()
             root.update()
+
+            time.sleep(.6)
+
+            game.move(block, move)
+            block = None
+            display_game()
+            root.update()
+            time.sleep(.1)
     
     algorithm_op.config(state="normal")
+    heuristic_op.config(state="normal")
     player_button.config(state="normal")
 
     
