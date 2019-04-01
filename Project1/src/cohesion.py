@@ -41,7 +41,6 @@ def handle_key_press(event):
     global LEVEL
     global run
     global game
-    global next_level
 
     if not run: return
 
@@ -63,7 +62,6 @@ def handle_key_press(event):
 
     if game.finished:
         run=False
-        next_level.config(state="normal")
 
 def display_game():
     canvas.delete(tk.ALL)
@@ -155,47 +153,15 @@ hard_mode.place(rely = 0.16, width = 56)
 
 
 
-
-
-def next_level_handler():
-    global LEVEL
-    global run
-    global game
-    global next_level
-
-    LEVEL += 1
-    if(LEVEL > len(levels)):
-        run = False
-        level_text.set('No more levels in this difficulty')
-    else:
-        game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
-        level_text.set('Level: ' + str(LEVEL))
-        display_game()
-
-    next_level.config(state="normal")
-
-
-
-
-next_level = tk.Button(root,
-    text="Next Level",
-    state="disabled",
-    command=next_level_handler)
-next_level.pack()
-next_level.place(rely = 0.9 , relx = 0.04, height = 35, width = 140)
-
-
 def start_player():
     global run
     global game
-    global next_level
     
     
 
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
     canvas.focus_set()
-    next_level.config(state="disabled")
     run = True
 
 player_button = tk.Button(root,
@@ -262,12 +228,10 @@ def start_ai():
     global game
     global ai_info
     global block
-    global next_level
 
     run = False
     algorithm_op.config(state="disabled")
     player_button.config(state="disabled")
-    next_level.config(state="disabled")
 
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
@@ -294,8 +258,6 @@ def start_ai():
     algorithm_op.config(state="normal")
     player_button.config(state="normal")
 
-    if game.finished:
-        next_level.config(state="normal")
     
     block = None
     display_game()
@@ -305,7 +267,7 @@ solve_button = tk.Button(root,
     padx=50,
     command= start_ai)
 solve_button.pack()
-solve_button.place(rely = 0.8 , relx = 0.04, height = 45)
+solve_button.place(rely = 0.85 , relx = 0.04, height = 45)
 
 ai_info = tk.StringVar()
 ai_info.set('STATS')
