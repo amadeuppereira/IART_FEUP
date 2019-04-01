@@ -220,7 +220,7 @@ max_depth.set("Max Depth")
 depth_input = tk.Entry(root, textvariable=max_depth)
 depth_input.config(state="disabled")
 depth_input.pack()
-depth_input.place(rely = 0.7 , relx = 0.02, height = 45)
+depth_input.place(rely = 0.7 , relx = 0.02, height = 45 , width = 120)
 
 def start_ai():
     global algorithm_op
