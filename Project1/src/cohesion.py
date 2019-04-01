@@ -127,6 +127,7 @@ difficulty_label.pack()
 difficulty_label.place(relx = 0.13, rely = 0.1, width = 80, height = 40)
 
 var = tk.StringVar()
+
 def select_mode():
     global GAMEMODE
     global game
@@ -228,6 +229,25 @@ algorithm_op.config(width=SIDE_MENU_WIDTH)
 algorithm_op.pack()
 algorithm_op.place(rely = 0.6 , relx = 0.02, width = 170)
 
+
+def heur_update(event):
+    global HEURISTIC
+    HEURISTIC = event
+
+
+heuristics = [
+    "heuristic_1",
+    "heuristic_2",
+    "heuristic_3"
+]
+
+heuristic_v = tk.StringVar(root)
+heuristic_v.set(heuristics[0])
+heuristic_op = tk.OptionMenu(root, heuristic_v, *heuristics, command=heur_update)
+heuristic_op.config(width=SIDE_MENU_WIDTH)
+heuristic_op.pack()
+heuristic_op.place(rely = 0.65 , relx = 0.02, width = 170)
+
 max_depth = tk.StringVar(root)
 max_depth.set("Max Depth")
 
@@ -256,7 +276,7 @@ def start_ai():
     if str.isdigit(max_depth.get()):
         depth = int(max_depth.get())
 
-    path, stats = get_computer_path(game, algorithm.get(), depth)
+    path, stats = get_computer_path(game, algorithm.get(), HEURISTIC, max_depth=depth)
 
     if len(path) == 0:
         ai_info.set("Time: %.5f s\nMemory: %d\nNo solution found!" % (stats[0], stats[1]))
