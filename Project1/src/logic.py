@@ -48,6 +48,7 @@ def manhattan_distance_equal_pieces(piecesCoords) :
             j = j+1
     return totalDistance
 
+
 # ----------------------------------------------------------------------------------
 #                                HEURISTICS
 # ----------------------------------------------------------------------------------
@@ -70,27 +71,7 @@ def heuristic_2(game) :
         totalDistances = totalDistances + manhattan_distance_equal_pieces(value)
     return totalDistances
 
-# Return the ratio between number of blocks and number of colors
-# def heuristic_2(game) :
-#     board = game.board
-#     pieces = getPiecesPositionsByColor(board)
-#     totalDistances = 0
-#     n_colors = 0
-#     for _, value in pieces.items():
-#         n_colors += 1
-#         totalDistances = totalDistances + distance_equal_pieces(value)
-    
-#     blocks_color_ratio = len(game.blocks) / n_colors
-
-#     if blocks_color_ratio == 1 :
-#         return 0
-#     else:
-#         return blocks_color_ratio
-
-# TODO: Linear Conflict maybe
-
-# Takes in account the pieces distance, the number of available moves
-# and the blocks/colors ratio
+# Returns an estimated number of movements remaining to group all the blocks with the same color
 def heuristic_3(game) :
     board = game.board
     pieces = getPiecesPositionsByColor(board)
@@ -99,22 +80,9 @@ def heuristic_3(game) :
     for _, value in pieces.items():
         n_colors += 1
         totalDistances = totalDistances + distance_equal_pieces(value)
-    
-    blocks_color_ratio = len(game.blocks) / n_colors
 
-    n_moves = 0
-    for block in game.blocks:
-        if game.is_possible_up(block): n_moves += 1
-        if game.is_possible_down(block): n_moves += 1
-        if game.is_possible_left(block): n_moves += 1
-        if game.is_possible_right(block): n_moves += 1
-    
-    if n_moves == 0:
-        n_moves = 100
-    else:
-        n_moves = len(game.blocks) / n_moves
+    return (len(game.blocks) - n_colors) * 6
 
-    return totalDistances * blocks_color_ratio + n_moves
     
 
 # ----------------------------------------------------------------------------------
@@ -240,6 +208,7 @@ def astar(game, heuristic):
         previous_heuristic = queue[i][0]
         game = queue[i][1]
         path = queue[i][2]
+
         queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
@@ -309,6 +278,7 @@ def ucs(game):
         cost = queue[i][0]
         game = queue[i][1]
         path = queue[i][2]
+
         queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
