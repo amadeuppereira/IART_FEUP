@@ -27,4 +27,4 @@ LEVEL = 1
 HEURISTIC = "heuristic_1"
 
 HINT_ALG = "a*"
-HINT_HEURISTIC = "heuristic_2"
+HINT_HEURISTIC = "heuristic_1"
