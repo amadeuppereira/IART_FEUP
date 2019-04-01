@@ -19,6 +19,9 @@ class Game:
     def __repr__(self):
         return str(self.board)
 
+    def __lt__(self, othe):
+        return True
+
     def generateBlocks(self):
         self.blocks = []
 

@@ -41,7 +41,7 @@ def handle_key_press(event):
     global LEVEL
     global run
     global game
-    global next_level
+    global ai_info
 
     if not run: return
 
@@ -63,7 +63,8 @@ def handle_key_press(event):
 
     if game.finished:
         run=False
-        next_level.config(state="normal")
+        hint_button.config(state="disabled")
+        ai_info.set("Finished")
 
 def display_game():
     canvas.delete(tk.ALL)
@@ -105,6 +106,13 @@ level_label.place(relx=0.02)
 def changeLevel():
     global LEVEL
     global game
+    global run
+    global ai_info
+
+    ai_info.set("STATS")
+
+    run = False
+    hint_button.config(state="disabled")
     value = levels_box.get()
     LEVEL = value
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
@@ -132,12 +140,21 @@ def select_mode():
     global GAMEMODE
     global game
     global levels
+    global run
+    global difficulty_text
+    global ai_info
+
+    ai_info.set("STATS")
+
+    run = False
+    hint_button.config(state="disabled")
     select = var.get()
     GAMEMODE = select
-    global difficulty_text
     difficulty_text.set(select.upper())
+
     with open('levels.json') as json_file:  
         levels = json.load(json_file)[GAMEMODE]
+
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
 
@@ -155,48 +172,18 @@ hard_mode.place(rely = 0.16, width = 56)
 
 
 
-
-
-def next_level_handler():
-    global LEVEL
-    global run
-    global game
-    global next_level
-
-    LEVEL += 1
-    if(LEVEL > len(levels)):
-        run = False
-        level_text.set('No more levels in this difficulty')
-    else:
-        game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
-        level_text.set('Level: ' + str(LEVEL))
-        display_game()
-
-    next_level.config(state="normal")
-
-
-
-
-next_level = tk.Button(root,
-    text="Next Level",
-    state="disabled",
-    command=next_level_handler)
-next_level.pack()
-next_level.place(rely = 0.9 , relx = 0.04, height = 35, width = 140)
-
-
 def start_player():
     global run
     global game
-    global next_level
-    
-    
+    global ai_info
 
+    ai_info.set("STATS")
+    
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
     canvas.focus_set()
-    next_level.config(state="disabled")
     run = True
+    hint_button.config(state="normal")
 
 player_button = tk.Button(root,
     text="Play",
@@ -222,12 +209,12 @@ algorithms = [
     "iterative depth"
 ]
 algorithm = tk.StringVar(root)
-algorithm.set(algorithms[0])
+algorithm.set(algorithms[2])
 
 algorithm_op = tk.OptionMenu(root, algorithm, *algorithms, command=alg_updated)
 algorithm_op.config(width=SIDE_MENU_WIDTH)
 algorithm_op.pack()
-algorithm_op.place(rely = 0.6 , relx = 0.02, width = 170)
+algorithm_op.place(rely = 0.7 , relx = 0.02, width = 170)
 
 
 def heur_update(event):
@@ -246,7 +233,7 @@ heuristic_v.set(heuristics[0])
 heuristic_op = tk.OptionMenu(root, heuristic_v, *heuristics, command=heur_update)
 heuristic_op.config(width=SIDE_MENU_WIDTH)
 heuristic_op.pack()
-heuristic_op.place(rely = 0.65 , relx = 0.02, width = 170)
+heuristic_op.place(rely = 0.75 , relx = 0.02, width = 170)
 
 max_depth = tk.StringVar(root)
 max_depth.set("Max Depth")
@@ -254,7 +241,53 @@ max_depth.set("Max Depth")
 depth_input = tk.Entry(root, textvariable=max_depth)
 depth_input.config(state="disabled")
 depth_input.pack()
-depth_input.place(rely = 0.7 , relx = 0.02, height = 45)
+depth_input.place(rely = 0.8 , relx = 0.02, height = 25 , width = 170)
+
+def hint():
+    global ai_info
+    global run
+    global block
+
+    if run:
+        run = False
+        depth = 3
+        if str.isdigit(max_depth.get()):
+            depth = int(max_depth.get())
+
+        path, _ = get_computer_path(game, HINT_ALG, HINT_HEURISTIC, max_depth=depth)
+        if len(path) == 0:
+            ai_info.set("No solution found!")   
+        else:
+            index = path[0][0]
+            move = path[0][1]
+            block = game.blocks[index]
+            display_game()
+            root.update()
+
+            time.sleep(.6)
+
+            game.move(block, move)
+            block = None
+            display_game()
+            root.update()
+            time.sleep(.1)
+
+        run = True
+    
+    if game.finished:
+        run=False
+        ai_info.set("Finished")
+        hint_button.config(state="disabled")
+            
+
+hint_button = tk.Button(root,
+    text="Hint",
+    padx=50,
+    command=hint)
+hint_button.pack()
+hint_button.place(rely = 0.55 , relx = 0.02, height = 25, width = 170)  
+hint_button.config(state="disabled")
+
 
 def start_ai():
     global algorithm_op
@@ -262,12 +295,18 @@ def start_ai():
     global game
     global ai_info
     global block
-    global next_level
 
     run = False
+
+    hint_button.config(state="disabled")
     algorithm_op.config(state="disabled")
+    heuristic_op.config(state="disabled")
     player_button.config(state="disabled")
-    next_level.config(state="disabled")
+    easy_mode.config(state="disabled")
+    medium_mode.config(state="disabled")
+    hard_mode.config(state="disabled")
+    levels_box.config(state="disabled")
+    solve_button.config(state="disabled")
 
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
@@ -283,20 +322,30 @@ def start_ai():
     else:
         ai_info.set("Time: %.5f s\nMemory: %d\nCost: %d" % (stats[0], stats[1], len(path)))
         for n in range(len(path)):
-            time.sleep(1)
             index = path[n][0]
             move = path[n][1]
             block = game.blocks[index]
-            game.move(block, move)
             display_game()
             root.update()
+
+            time.sleep(.6)
+
+            game.move(block, move)
+            block = None
+            display_game()
+            root.update()
+            time.sleep(.1)
     
     algorithm_op.config(state="normal")
+    heuristic_op.config(state="normal")
     player_button.config(state="normal")
+    easy_mode.config(state="normal")
+    medium_mode.config(state="normal")
+    hard_mode.config(state="normal")
+    levels_box.config(state="normal")
+    solve_button.config(state="normal")
 
-    if game.finished:
-        next_level.config(state="normal")
-    
+
     block = None
     display_game()
 
@@ -305,7 +354,7 @@ solve_button = tk.Button(root,
     padx=50,
     command= start_ai)
 solve_button.pack()
-solve_button.place(rely = 0.8 , relx = 0.04, height = 45)
+solve_button.place(rely = 0.85 , relx = 0.04, height = 45)
 
 ai_info = tk.StringVar()
 ai_info.set('STATS')
