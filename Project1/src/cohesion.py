@@ -62,6 +62,7 @@ def handle_key_press(event):
     display_game()
 
     if game.finished:
+        run=False
         next_level.config(state="normal")
 
 def display_game():
@@ -101,8 +102,16 @@ level_label = tk.Label(root,
 level_label.pack()
 level_label.place(relx=0.02)
 
+def changeLevel():
+    global LEVEL
+    global game
+    value = levels_box.get()
+    LEVEL = value
+    game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
+    display_game()
+    
 
-levels_box = tk.Spinbox(root, from_=0, to = len(levels))
+levels_box = tk.Spinbox(root, from_=1, to = len(levels), command = changeLevel)
 levels_box.pack()
 levels_box.place(height = 25, width = 50, rely = 0.034, relx = 0.15)
 
@@ -119,9 +128,17 @@ difficulty_label.place(relx = 0.13, rely = 0.1, width = 80, height = 40)
 
 var = tk.StringVar()
 def select_mode():
+    global GAMEMODE
+    global game
+    global levels
     select = var.get()
+    GAMEMODE = select
     global difficulty_text
     difficulty_text.set(select.upper())
+    with open('levels.json') as json_file:  
+        levels = json.load(json_file)[GAMEMODE]
+    game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
+    display_game()
 
 easy_mode = tk.Radiobutton(root, text="EASY", variable=var, value="easy" , indicatoron = 0, command = select_mode)
 easy_mode.pack(anchor = "w")
@@ -171,6 +188,8 @@ def start_player():
     global run
     global game
     global next_level
+    
+    
 
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
