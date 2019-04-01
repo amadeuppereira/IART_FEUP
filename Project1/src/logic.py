@@ -46,8 +46,7 @@ def heuristic_1(game) :
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
-
-# Takes in account the pieces distance and the blocks/colors ratio
+# Ratio between number of blocks and number of colors
 def heuristic_2(game) :
     board = game.board
     pieces = getPiecesPositionsByColor(board)
@@ -59,7 +58,10 @@ def heuristic_2(game) :
     
     blocks_color_ratio = len(game.blocks) / n_colors
 
-    return totalDistances * blocks_color_ratio
+    if blocks_color_ratio == 1 :
+        return 0
+    else:
+        return blocks_color_ratio
 
 # Takes in account the pieces distance, the number of available moves
 # and the blocks/colors ratio
