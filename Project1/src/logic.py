@@ -20,6 +20,9 @@ def getPiecesPositionsByColor(board):
 def distance_between_points(x1,y1,x2,y2) :
     return math.sqrt( (x2 - x1)**2 + (y2 - y1)**2)
 
+def manhattan_distance_between_points(x1,y1,x2,y2) :
+    return abs(x1 - x2) + abs(y1 - y2)
+
 # Return the sum of all the distances between pieces of the same color
 def distance_equal_pieces(piecesCoords) :
     totalDistance = 0
@@ -33,6 +36,17 @@ def distance_equal_pieces(piecesCoords) :
             j = j+1
     return totalDistance
 
+def manhattan_distance_equal_pieces(piecesCoords) :
+    totalDistance = 0
+    for i in range(len(piecesCoords)):
+        j = i+1
+        while j < len(piecesCoords) :
+            distance = manhattan_distance_between_points(piecesCoords[i][0], piecesCoords[i][1], piecesCoords[j][0], piecesCoords[j][1])
+            # If the distance between two points is 1 then it means they are adjacent so we ignore their distance
+            if distance > 1 :
+                totalDistance = totalDistance + distance
+            j = j+1
+    return totalDistance
 
 # ----------------------------------------------------------------------------------
 #                                HEURISTICS
@@ -47,22 +61,33 @@ def heuristic_1(game) :
         totalDistances = totalDistances + distance_equal_pieces(value)
     return totalDistances
 
-# Return the ratio between number of blocks and number of colors
+# Returns the sum of all the manhattan distances between pieces of the same color
 def heuristic_2(game) :
     board = game.board
     pieces = getPiecesPositionsByColor(board)
     totalDistances = 0
-    n_colors = 0
     for _, value in pieces.items():
-        n_colors += 1
-        totalDistances = totalDistances + distance_equal_pieces(value)
-    
-    blocks_color_ratio = len(game.blocks) / n_colors
+        totalDistances = totalDistances + manhattan_distance_equal_pieces(value)
+    return totalDistances
 
-    if blocks_color_ratio == 1 :
-        return 0
-    else:
-        return blocks_color_ratio
+# Return the ratio between number of blocks and number of colors
+# def heuristic_2(game) :
+#     board = game.board
+#     pieces = getPiecesPositionsByColor(board)
+#     totalDistances = 0
+#     n_colors = 0
+#     for _, value in pieces.items():
+#         n_colors += 1
+#         totalDistances = totalDistances + distance_equal_pieces(value)
+    
+#     blocks_color_ratio = len(game.blocks) / n_colors
+
+#     if blocks_color_ratio == 1 :
+#         return 0
+#     else:
+#         return blocks_color_ratio
+
+# TODO: Linear Conflict maybe
 
 # Takes in account the pieces distance, the number of available moves
 # and the blocks/colors ratio
@@ -201,26 +226,21 @@ A* Algorithm
 """
 def astar(game, heuristic):
     path = []
-    # queue = [[heuristic(game), game, path]]
-    queue = Q.PriorityQueue()
-    queue.put([heuristic(game), game, path])
+    queue = [[heuristic(game), game, path]]
 
     visited = []
     mem = 1
 
     while queue:
-        # i = 0
-        # for j in range(1, len(queue)):
-        #     if queue[i][0] > queue[j][0]:
-        #         i = j
-        g = queue.get()
+        i = 0
+        for j in range(1, len(queue)):
+            if queue[i][0] > queue[j][0]:
+                i = j
         
-        # previous_heuristic = queue[i][0]
-        # game = queue[i][1]
-        # path = queue[i][2]
-        # queue = queue[:i] + queue[i+1:]
-        game = g[1]
-        path = g[2]
+        previous_heuristic = queue[i][0]
+        game = queue[i][1]
+        path = queue[i][2]
+        queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
             return (path, mem)
@@ -228,10 +248,8 @@ def astar(game, heuristic):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            # new_node = [previous_heuristic + heuristic(new_game) - heuristic(game), new_game, new_path]
             new_node = [heuristic(new_game) + len(new_path), new_game, new_path]
-            # queue.append(new_node)
-            queue.put(new_node)
+            queue.append(new_node)
             mem += 1
 
         visited.append(game)

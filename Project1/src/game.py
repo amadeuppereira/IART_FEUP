@@ -60,9 +60,6 @@ class Game:
                 return False
             else:
                 colors.append(block.color)
-        # print("Finished with " + str(self.number_moves) + " moves")
-        # elapsed_time = time.time() - self.start_time
-        # print("You took " + str("{0:.2f}".format(elapsed_time)) + " seconds")
         return True
 
     def is_possible_up(self, block):
