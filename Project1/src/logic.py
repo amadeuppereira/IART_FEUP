@@ -4,7 +4,7 @@ from copy import deepcopy
 import time
 import queue as Q
 
-MAX_TREE_DEPTH = 15
+DEFAULT_TREE_DEPTH = 15
 
 # Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
@@ -344,8 +344,7 @@ def iterative_depth(game, max_depth):
 
 
 # COMPUTER MOVE: calls algorithms and returns path
-def get_computer_path(game, alg, heuristic , max_depth = MAX_TREE_DEPTH) :
-
+def get_computer_path(game, alg, heuristic , max_depth = DEFAULT_TREE_DEPTH) :
     if heuristic == "heuristic_1": heuristic = heuristic_1
     elif heuristic == "heuristic_2": heuristic = heuristic_2
     elif heuristic == "heuristic_3": heuristic = heuristic_3
