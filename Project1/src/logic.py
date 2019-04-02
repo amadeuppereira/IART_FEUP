@@ -77,7 +77,7 @@ def heuristic_3(game) :
     pieces = getPiecesPositionsByColor(board)
     n_colors = len(pieces.items())
 
-    return (len(game.blocks) - n_colors) * 3
+    return (len(game.blocks) - n_colors) * 6
 
 
 
