@@ -8,7 +8,6 @@ class Game:
         self.generateBlocks()
         self.finished = False
         self.number_moves = 0
-        self.start_time = time.time()
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -18,9 +17,6 @@ class Game:
 
     def __repr__(self):
         return str(self.board)
-
-    def __lt__(self, othe):
-        return True
 
     def generateBlocks(self):
         self.blocks = []
