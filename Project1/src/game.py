@@ -19,7 +19,7 @@ class Game:
     def __repr__(self):
         return str(self.board)
 
-    def __lt__(self, othe):
+    def __lt__(self, other):
         return False
 
     def generateBlocks(self):
