@@ -311,11 +311,7 @@ def start_ai():
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
 
-<<<<<<< HEAD
     depth = 20
-=======
-    depth = 15
->>>>>>> f00b3e4678f1a561eb2fdae7ac72e4dea49e5dc6
     if str.isdigit(max_depth.get()):
         depth = int(max_depth.get())
 
