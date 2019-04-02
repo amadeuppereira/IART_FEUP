@@ -225,35 +225,36 @@ Greedy Search
 """
 def greedy(game, heuristic):
     path = []
-    queue = [heuristic(game), game, path]
+    queue = [[heuristic(game), game, path]]
+
     visited = []
     mem = 1
 
     while queue:
-        game = queue[1]
-        path = queue[2]
+        i = 0
+        for j in range(1, len(queue)):
+            if queue[i][0] > queue[j][0]:
+                i = j
         
-        best_child = []
+        game = queue[i][1]
+        path = queue[i][2]
+
+        queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
             return (path, mem)
-
         if game in visited: continue
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
             new_node = [heuristic(new_game), new_game, new_path]
-            if best_child:
-                if best_child[0] > new_node[0]:
-                    best_child = new_node
-            else:
-                best_child = new_node
+            queue.append(new_node)
             mem += 1
 
         visited.append(game)
-        queue = best_child
 
     return ([], mem)
+
 
 """
 Uniform Cost Search
