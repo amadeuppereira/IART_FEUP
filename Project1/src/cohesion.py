@@ -319,7 +319,7 @@ def start_ai():
     game = Game(deepcopy(levels[str(LEVEL)]), LEVEL)
     display_game()
 
-    depth = 15
+    depth = 20
     if str.isdigit(max_depth.get()):
         depth = int(max_depth.get())
 
