@@ -317,7 +317,7 @@ def dfs_limit(game, limit):
             new_moves = get_game_moves(game)
             for move, new_game in new_moves:
                 repeated = False
-                
+
                 for node_visited in visited:
                     if node_visited[1] == new_game and new_depth >= node_visited[0]:
                         repeated = True
