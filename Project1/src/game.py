@@ -18,6 +18,7 @@ class Game:
     def __repr__(self):
         return str(self.board)
 
+    #Generates the blocks of the current board
     def generateBlocks(self):
         self.blocks = []
 
@@ -30,6 +31,7 @@ class Game:
         self.update_blocks()
         self.update_blocks()
             
+    #Updates the board according to the current blocks
     def update_board(self):
         for j in range(len(self.board)):
             for i in range(len(self.board[0])):
@@ -39,6 +41,7 @@ class Game:
             for [x,y] in block.coords:
                 self.board[x][y] = block.color
 
+    #Updates the blocks by checking for new joins
     def update_blocks(self):
         for block1 in self.blocks:
             for block2 in reversed(self.blocks):
@@ -48,7 +51,8 @@ class Game:
                 
         if self.is_finished():
             self.finished = True
-        
+    
+    #Checks if there are more than 1 block with same color, if dont returns true, else returns false
     def is_finished(self):
         colors = []
         for block in self.blocks:
@@ -58,6 +62,7 @@ class Game:
                 colors.append(block.color)
         return True
 
+    #Cheks if is possible to move up a block
     def is_possible_up(self, block):
         for [x,y] in block.coords:
             x1 = x - 1
@@ -65,6 +70,7 @@ class Game:
                 return False
         return True
 
+    #Cheks if is possible to move down a block
     def is_possible_down(self, block):
         for [x,y] in block.coords:
             x1 = x + 1
@@ -72,6 +78,8 @@ class Game:
                 return False
         return True
 
+
+    #Cheks if is possible to move left a block
     def is_possible_left(self, block):
         for [x,y] in block.coords:
             y1 = y - 1
@@ -79,6 +87,7 @@ class Game:
                 return False
         return True
 
+    #Cheks if is possible to move right a block
     def is_possible_right(self, block):
         for [x,y] in block.coords:
             y1 = y + 1
@@ -86,6 +95,7 @@ class Game:
                 return False
         return True
 
+    #Returns the block corresponding to the given x and y coordinates, returns false if no block is found
     def get_block(self, x, y):
         for block in self.blocks:
             for [x1,y1] in block.coords:
@@ -94,6 +104,7 @@ class Game:
 
         return False
                 
+    #Block movement handler
     def move(self, block, move):
         if move == "up" and self.is_possible_up(block):
                 self.number_moves = self.number_moves + 1
