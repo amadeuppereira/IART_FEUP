@@ -340,7 +340,6 @@ Iterative Depth Search
 def iterative_depth(game, max_depth):
     mem = 0
     for i in range(0, max_depth):
-        print(i)
         ret = dfs_limit(game, i)
         mem += ret[1]
         if ret[0]:
