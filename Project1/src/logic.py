@@ -296,7 +296,7 @@ def ucs(game):
 Depth-First Search with limit
 """
 def dfs_limit(game, limit):
-    visited = []
+    visited = [[0, game]]
     path = []
     queue = [[0, game, path]]
     mem = 1
@@ -313,15 +313,21 @@ def dfs_limit(game, limit):
             return (path, mem)
 
         new_depth = depth + 1
-        if new_depth < limit :
+        if depth < limit :
             new_moves = get_game_moves(game)
             for move, new_game in new_moves:
-                if new_game not in visited:
+                repeated = False
+                for node_visited in visited:
+                    if node_visited[1] == new_game:
+                        if new_depth >= node_visited[0]:
+                            repeated = True
+
+                if not repeated:
                     new_path = path + [move]
                     child_nodes.append([new_depth, new_game, new_path])
                     mem += 1
         
-            visited.append(game)
+            visited.append([depth, game])
             queue = child_nodes + queue[1:]
         else:
             queue = queue[1:]

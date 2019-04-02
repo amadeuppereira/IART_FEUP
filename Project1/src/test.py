@@ -289,12 +289,12 @@ print("-------- ITERATIVE DEPTH SEARCH --------", "\n")
 MAX_TREE_DEPTH = 20
 
 # Easy
-# print("-> Easy")
-# g = Game(easy_board, 1)
-# start_time = time.time()
-# path = iterative_depth(g, MAX_TREE_DEPTH)
-# elapsed_time = time.time() - start_time
-# print("MOVES: ", len(path[0]), "\nMEMORY: ", path[1], "\nTIME: ","{0:.4f}".format(elapsed_time), "\n")
+print("-> Easy")
+g = Game(easy_board, 1)
+start_time = time.time()
+path = iterative_depth(g, MAX_TREE_DEPTH)
+elapsed_time = time.time() - start_time
+print("MOVES: ", len(path[0]), "\nMEMORY: ", path[1], "\nTIME: ","{0:.4f}".format(elapsed_time), "\n")
 
 # Medium
 print("-> Medium")
@@ -305,10 +305,10 @@ elapsed_time = time.time() - start_time
 print("MOVES: ", len(path[0]), "\nMEMORY: ", path[1], "\nTIME: ","{0:.4f}".format(elapsed_time), "\n")
 
 # Hard
-# print("-> Hard")
-# g = Game(hard_board, 1)
-# start_time = time.time()
-# path = iterative_depth(g, MAX_TREE_DEPTH)
-# elapsed_time = time.time() - start_time
-# print("MOVES: ", len(path[0]), "\nMEMORY: ", path[1], "\nTIME: ","{0:.4f}".format(elapsed_time), "\n")
+print("-> Hard")
+g = Game(hard_board, 1)
+start_time = time.time()
+path = iterative_depth(g, MAX_TREE_DEPTH)
+elapsed_time = time.time() - start_time
+print("MOVES: ", len(path[0]), "\nMEMORY: ", path[1], "\nTIME: ","{0:.4f}".format(elapsed_time), "\n")
 
