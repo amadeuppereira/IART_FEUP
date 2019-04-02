@@ -77,9 +77,9 @@ def heuristic_3(game) :
     pieces = getPiecesPositionsByColor(board)
     n_colors = len(pieces.items())
 
-    return (len(game.blocks) - n_colors) * 6
+    return (len(game.blocks) - n_colors) * 3
 
-    
+
 
 # ----------------------------------------------------------------------------------
 #                                GAME MOVES
@@ -99,11 +99,11 @@ def get_game_moves(game):
         if temp_game.move(temp_game.blocks[i], "down"):
             ret.append(([i, "down"], temp_game))
             temp_game = deepcopy(game)
-        
+
         if temp_game.move(temp_game.blocks[i], "left"):
             ret.append(([i, "left"], temp_game))
             temp_game = deepcopy(game)
-        
+
         if temp_game.move(temp_game.blocks[i], "right"):
             ret.append(([i, "right"], temp_game))
             temp_game = deepcopy(game)
@@ -126,7 +126,7 @@ def bfs(game) :
     queue = [[game, path]]
     visited = []
     mem = 1
-    
+
     while queue:
         new_queue = []
 
@@ -138,15 +138,15 @@ def bfs(game) :
                 return (path, mem)
 
             new_moves = get_game_moves(game)
-            
+
             for move, new_game in new_moves:
                 if new_game not in visited:
                     new_path = path + [move]
                     new_queue.append([new_game, new_path])
                     mem += 1
-            
+
             visited.append(game)
-        
+
         queue = new_queue
 
     return ([], mem)
@@ -171,18 +171,18 @@ def dfs(game):
             return (path, mem)
 
         new_moves = get_game_moves(game)
-        
+
         for move, new_game in new_moves:
             if new_game not in visited:
                 new_path = path + [move]
                 child_nodes.append([new_game, new_path])
                 mem += 1
-        
+
         visited.append(game)
-        
+
         # Appending new nodes to the start of the list
         queue = child_nodes + queue[1:]
-    
+
     return ([], mem)
 
 """
@@ -200,7 +200,7 @@ def astar(game, heuristic):
         for j in range(1, len(queue)):
             if queue[i][0] > queue[j][0]:
                 i = j
-        
+
         game = queue[i][1]
         path = queue[i][2]
 
@@ -218,7 +218,7 @@ def astar(game, heuristic):
 
         visited.append(game)
 
-    return ([], mem)  
+    return ([], mem)
 
 """
 Greedy Search
@@ -235,7 +235,7 @@ def greedy(game, heuristic):
         for j in range(1, len(queue)):
             if queue[i][0] > queue[j][0]:
                 i = j
-        
+
         game = queue[i][1]
         path = queue[i][2]
 
@@ -270,7 +270,7 @@ def ucs(game):
         for j in range(1, len(queue)):
             if queue[i][0] > queue[j][0]:
                 i = j
-        
+
         cost = queue[i][0]
         game = queue[i][1]
         path = queue[i][2]
@@ -283,14 +283,14 @@ def ucs(game):
         for move, new_game in get_game_moves(game):
             if new_game in visited: continue
             new_path = path + [move]
-            # Only add 1 to cost because each move only costs 1 
+            # Only add 1 to cost because each move only costs 1
             new_node = [cost + 1, new_game, new_path]
             queue.append(new_node)
             mem += 1
 
         visited.append(game)
 
-    return ([], mem) 
+    return ([], mem)
 
 """
 Depth-First Search with limit
@@ -303,7 +303,7 @@ def dfs_limit(game, limit):
 
     while queue:
         child_nodes = []
-        
+
         queue_item = queue[0]
         depth = queue_item[0]
         game = queue_item[1]
@@ -326,12 +326,12 @@ def dfs_limit(game, limit):
                     new_path = path + [move]
                     child_nodes.append([new_depth, new_game, new_path])
                     mem += 1
-        
+
             visited.append([depth, game])
             queue = child_nodes + queue[1:]
         else:
             queue = queue[1:]
-    
+
     return ([], mem)
 
 """
@@ -347,7 +347,7 @@ def iterative_depth(game, max_depth):
 
     return ([], mem)
 
-    
+
 
 
 # COMPUTER MOVE: calls algorithms and returns path
