@@ -4,8 +4,6 @@ from copy import deepcopy
 import time
 import queue as Q
 
-MAX_TREE_DEPTH = 20
-
 # Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
     pieces = {}
