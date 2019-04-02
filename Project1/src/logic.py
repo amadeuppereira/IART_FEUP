@@ -4,6 +4,8 @@ from copy import deepcopy
 import time
 import queue as Q
 
+MAX_TREE_DEPTH = 15
+
 # Returns all the pieces positions ordered by their color
 def getPiecesPositionsByColor(board):
     pieces = {}
@@ -293,9 +295,9 @@ def ucs(game):
     return ([], mem) 
 
 """
-Iterative Depth Search
+Depth-First Search with limit
 """
-def iterative_depth(game, limit):
+def dfs_limit(game, limit):
     visited = []
     path = []
     queue = [[0, game, path]]
@@ -312,26 +314,37 @@ def iterative_depth(game, limit):
         if game.is_finished():
             return (path, mem)
 
-        new_moves = get_game_moves(game)
         new_depth = depth + 1
-        for move, new_game in new_moves:
-            if new_game not in visited:
-                new_path = path + [move]
-                child_nodes.append([new_depth, new_game, new_path])
-                mem += 1
+        if new_depth < limit :
+            new_moves = get_game_moves(game)
+            for move, new_game in new_moves:
+                if new_game not in visited:
+                    new_path = path + [move]
+                    child_nodes.append([new_depth, new_game, new_path])
+                    mem += 1
         
-        visited.append(game)
-        
-        if new_depth % limit == 0:
-            queue = queue[1:] + child_nodes
-        else:
+            visited.append(game)
             queue = child_nodes + queue[1:]
+        else:
+            queue = queue[1:]
     
     return ([], mem)
 
+"""
+Iterative Depth Search
+"""
+def iterative_depth(game, max_depth):
+    for i in range(0, max_depth):
+        # print(i)
+        ret = dfs_limit(game, i)
+        if ret[0]:
+            return ret
+
+    
+
 
 # COMPUTER MOVE: calls algorithms and returns path
-def get_computer_path(game, alg, heuristic , max_depth = 3) :
+def get_computer_path(game, alg, heuristic , max_depth = MAX_TREE_DEPTH) :
 
     if heuristic == "heuristic_1": heuristic = heuristic_1
     elif heuristic == "heuristic_2": heuristic = heuristic_2
