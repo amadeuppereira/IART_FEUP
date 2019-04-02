@@ -75,11 +75,7 @@ def heuristic_2(game) :
 def heuristic_3(game) :
     board = game.board
     pieces = getPiecesPositionsByColor(board)
-    totalDistances = 0
-    n_colors = 0
-    for _, value in pieces.items():
-        n_colors += 1
-        totalDistances = totalDistances + distance_equal_pieces(value)
+    n_colors = len(pieces.items())
 
     return (len(game.blocks) - n_colors) * 6
 
@@ -205,7 +201,6 @@ def astar(game, heuristic):
             if queue[i][0] > queue[j][0]:
                 i = j
         
-        previous_heuristic = queue[i][0]
         game = queue[i][1]
         path = queue[i][2]
 
