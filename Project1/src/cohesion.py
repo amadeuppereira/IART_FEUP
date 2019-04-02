@@ -12,6 +12,8 @@ from copy import deepcopy
 import time
 
 levels = []
+
+#load levels
 with open('levels.json') as json_file:  
     levels = json.load(json_file)[GAMEMODE]
 
@@ -25,7 +27,7 @@ root.title("COHESION")
 root.resizable(0,0)
 
 
-
+#mouse click handler
 def handle_click(event): 
     global run
     global block 
@@ -35,6 +37,7 @@ def handle_click(event):
         event.x // (CELL_WIDTH + MARGIN))
     display_game()
 
+#keyboard handler
 def handle_key_press(event): 
     global run
     global block
@@ -66,6 +69,7 @@ def handle_key_press(event):
         hint_button.config(state="disabled")
         ai_info.set("Finished")
 
+#Graphic representation of the game
 def display_game():
     canvas.delete(tk.ALL)
     for i in range(len(game.board)):
@@ -103,6 +107,7 @@ level_label = tk.Label(root,
 level_label.pack()
 level_label.place(relx=0.02)
 
+#Change level handler
 def changeLevel():
     global LEVEL
     global game
@@ -136,6 +141,7 @@ difficulty_label.place(relx = 0.13, rely = 0.1, width = 80, height = 40)
 
 var = tk.StringVar()
 
+#Select mode handler
 def select_mode():
     global GAMEMODE
     global game
@@ -171,7 +177,7 @@ hard_mode.pack(anchor = "w")
 hard_mode.place(rely = 0.16, width = 56)
 
 
-
+#Player mode handler
 def start_player():
     global run
     global game
@@ -191,6 +197,7 @@ player_button = tk.Button(root,
 player_button.pack()
 player_button.place(rely = 0.45, relx = 0.02, height = 55, width = 170)
 
+#Handler for the max_depth option
 def alg_updated(event):
     global depth_input
 
@@ -216,7 +223,7 @@ algorithm_op.config(width=SIDE_MENU_WIDTH)
 algorithm_op.pack()
 algorithm_op.place(rely = 0.7 , relx = 0.02, width = 170)
 
-
+#Heuristic handler
 def heur_update(event):
     global HEURISTIC
     HEURISTIC = event
@@ -243,6 +250,7 @@ depth_input.config(state="disabled")
 depth_input.pack()
 depth_input.place(rely = 0.8 , relx = 0.02, height = 25 , width = 170)
 
+#Hint handler -> Computes the best next move to be played 
 def hint():
     global ai_info
     global run
@@ -288,7 +296,7 @@ hint_button.pack()
 hint_button.place(rely = 0.55 , relx = 0.02, height = 25, width = 170)  
 hint_button.config(state="disabled")
 
-
+#Computer mode handler
 def start_ai():
     global algorithm_op
     global run

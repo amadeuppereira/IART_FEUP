@@ -24,5 +24,6 @@ GAMEMODE = "easy"
 LEVEL = 1
 HEURISTIC = "heuristic_1"
 
+# HEURISTICS settings
 HINT_ALG = "a*"
 HINT_HEURISTIC = "heuristic_1"
