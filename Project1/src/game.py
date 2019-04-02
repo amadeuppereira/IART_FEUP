@@ -20,7 +20,7 @@ class Game:
         return str(self.board)
 
     def __lt__(self, othe):
-        return True
+        return False
 
     def generateBlocks(self):
         self.blocks = []

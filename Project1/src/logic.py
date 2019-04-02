@@ -190,21 +190,24 @@ A* Algorithm
 """
 def astar(game, heuristic):
     path = []
-    queue = [[heuristic(game), game, path]]
+    # queue = [[heuristic(game), game, path]]
+    queue = Q.PriorityQueue()
+    queue.put([heuristic(game), game, path])
 
     visited = []
     mem = 1
 
     while queue:
-        i = 0
-        for j in range(1, len(queue)):
-            if queue[i][0] > queue[j][0]:
-                i = j
+        # i = 0
+        # for j in range(1, len(queue)):
+        #     if queue[i][0] > queue[j][0]:
+        #         i = j
         
-        game = queue[i][1]
-        path = queue[i][2]
+        temp = queue.get()
+        game = temp[1]
+        path = temp[2]
 
-        queue = queue[:i] + queue[i+1:]
+        # queue = queue[:i] + queue[i+1:]
 
         if game.is_finished():
             return (path, mem)
@@ -213,7 +216,7 @@ def astar(game, heuristic):
             if new_game in visited: continue
             new_path = path + [move]
             new_node = [heuristic(new_game) + len(new_path), new_game, new_path]
-            queue.append(new_node)
+            queue.put(new_node)
             mem += 1
 
         visited.append(game)
@@ -356,3 +359,17 @@ def get_computer_path(game, alg, heuristic , max_depth = 3) :
     elif alg == "iterative depth":
         path, mem = iterative_depth(game, max_depth)
         return (path, [time.time() - start_time, mem])
+
+
+q = Q.PriorityQueue()
+q.put([1,Game([[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"a"])
+q.put([1,Game([[2,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"c"])
+q.put([2,Game([[3,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"b"])
+q.put([1,Game([[4,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"b"])
+q.put([2,Game([[5,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"a"])
+q.put([1,Game([[6,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"c"])
+q.put([1,Game([[7,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"b"])
+q.put([1,Game([[8,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]),"a"])
+
+while not q.empty():
+    print(q.get())
