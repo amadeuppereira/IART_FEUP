@@ -26,4 +26,4 @@ HEURISTIC = "heuristic_1"
 
 # HEURISTICS settings
 HINT_ALG = "a*"
-HINT_HEURISTIC = "heuristic_1"
+HINT_HEURISTIC = "heuristic_3"
