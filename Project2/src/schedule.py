@@ -1,0 +1,1 @@
+timeslots = 45
