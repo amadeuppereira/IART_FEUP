@@ -1,4 +1,5 @@
 import math
+import random
 
 MAX_ATTEMPS = 1000000
 
@@ -17,6 +18,13 @@ def getRandomNode() :
 # Gets the best neighbor from current node
 def getBestNeighbor(current) :
     print("Best neighbor")
+    node = "idk"
+    return node
+
+# TODO:
+# Gets a random neighbor from current node
+def getRandomNeighbor(current) :
+    print("Random neighbor")
     node = "idk"
     return node
 
@@ -44,7 +52,14 @@ def hill_climbing() :
 # – Temperatura que vai sendo sucessivamente reduzida define a probabilidade de aceitar soluções piores
 def simulated_annealing() :
     current = getRandomNode()
-    for i in range (0, MAX_ATTEMPS) :
-        print(i)
+    T = 100
+    for i in range (1, MAX_ATTEMPS) :
+        if T < 0 : return current
+        next = getRandomNeighbor(current)
+        ap = math.exp((value(next)-value(current))/T)
+        if ap > random.uniform(0, 1) :
+            current = next
+        T = T - (1/math.log(1+i))
+    return current
 
-# simulated_annealing()
+simulated_annealing()
