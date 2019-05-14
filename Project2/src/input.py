@@ -1,6 +1,8 @@
-file = open("competition/competition01.tim","r") 
+from settings import *
 
-first_line = file.readline().split()
+input_file = open(filename + ".tim","r") 
+
+first_line = input_file.readline().split()
 num_events = int(first_line[0])
 num_rooms = int(first_line[1])
 num_features = int(first_line[2])
@@ -8,7 +10,7 @@ num_students = int(first_line[3])
 
 rooms = []
 for i in range(0, num_rooms) :
-    rooms.append(int(file.readline()))
+    rooms.append(int(input_file.readline()))
 
 
 # students_events[student][event]
@@ -18,7 +20,7 @@ students_events = []
 for i in range(0, num_students) :
     events_temp = []
     for j in range(0, num_events) :
-        events_temp.append(int(file.readline()))
+        events_temp.append(int(input_file.readline()))
     students_events.append(events_temp)
 
 
@@ -29,7 +31,7 @@ rooms_features = []
 for i in range(0, num_rooms) :
     features_temp = []
     for j in range(0, num_features) :
-        features_temp.append(int(file.readline()))
+        features_temp.append(int(input_file.readline()))
     rooms_features.append(features_temp)
 
 
@@ -40,6 +42,6 @@ events_features = []
 for i in range(0, num_events) :
     features_temp = []
     for j in range(0, num_features) :
-        features_temp.append(int(file.readline()))
+        features_temp.append(int(input_file.readline()))
     events_features.append(features_temp)
 
