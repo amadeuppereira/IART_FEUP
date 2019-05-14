@@ -44,4 +44,3 @@ for i in range(0, num_events) :
     for j in range(0, num_features) :
         features_temp.append(int(input_file.readline()))
     events_features.append(features_temp)
-
