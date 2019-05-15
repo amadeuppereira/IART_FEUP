@@ -63,4 +63,5 @@ def simulated_annealing() :
         T = T - (1/math.log(1+i))
     return current
 
-simulated_annealing()
+
+

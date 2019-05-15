@@ -11,8 +11,12 @@ output_file = open(filename + ".sln", "w")
 # The room is the room number assigned to the event. Rooms are numbered in the order from the problem file, starting at zero.
 
 # Write to file here
-output_file.write("1 1 2 2 2 2 1 1")
 
+def write_to_file(slots, num_events) :
+    print("aQUI")
+    for i in range(num_events):
+        for slot in slots :
+            if i in slot.event_room :
+                output_file.write(str(slot.id) + " " + str(slot.event_room[i]) + "\n")
 
-
-output_file.close()
+    output_file.close()

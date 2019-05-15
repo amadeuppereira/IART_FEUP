@@ -21,7 +21,6 @@ class Event:
 ROOMS = []
 STUDENTS = []
 EVENTS = []
-SLOTS = []
 
 for i, size in enumerate(rooms):
     r = Room()
@@ -90,60 +89,43 @@ class Slot:
     event_room = None
 
 def getRandomSolution() :
+    SLOTS = []
     for i in range (0, timeslots) :
         slot = Slot()
         slot.id = i
         slot.event_room = {}
         SLOTS.append(slot)
 
-    # i = 0
-    
-    # while i < len(EVENTS) :
-    #     print(i)
-    #     room_id = EVENTS[i].rooms[random.randint(0,len(EVENTS[i].rooms)-1)]
-    #     slot_id = random.randint(0,44)
-    #     if room_id not in SLOTS[slot_id].event_room.values() :
-    #         flag = True
-    #         for event_slots in SLOTS[slot_id].event_room :
-    #             if INCIDENCE[EVENTS[i].id][event_slots] == False :
-    #                 flag = False
-    #         if flag :
-    #             SLOTS[slot_id].event_room[EVENTS[i].id] = room_id
-    #             i += 1
-
-    #         # SLOTS[random.randint(0,44)].event_room[EVENTS[i].id] = room_id
-    #         # i += 1
-
-    # SLOTS[0].event_room[EVENTS[3].id] = EVENTS[3].rooms[0]
-    # SLOTS[2].event_room[EVENTS[2].id] = EVENTS[2].rooms[0]
-
     available_events = EVENTS[:]
     while len(available_events) > 0:
-        temp, slots = get_best_event(available_events)
+        temp, slots = get_best_event(available_events, SLOTS)
         if len(slots) == 0:
             available_events = EVENTS[:]
             continue
         available_events.remove(temp)
         # slot = slots[random.randint(0, len(slots)-1)]
-        slot = slots[0][0] #selects the slot with the biggest number os rooms
-        SLOTS[slot].event_room[temp.id] = list(slots[2])[random.randint(0, len(slots[2])-1)]
+        slot_id = slots[0][0] #selects the slot with the biggest number of rooms
+
+        SLOTS[slot_id].event_room[temp.id] = slots[0][2][random.randint(0, len(slots[0][2])-1)]
+
+    return SLOTS
 
     
-def get_best_event(available_events) :
+def get_best_event(available_events, SLOTS) :
     temp = {}
     for event in available_events :
-        temp[event] = get_possible_slots(event)
-    best_value = min(temp.values(), key=lambda x: len(x))
+        temp[event] = get_possible_slots(event, SLOTS)
+    best_value = len(min(temp.values(), key=lambda x: len(x)))
     
     temp_list = []
     for event, value in temp.items() :
-        if value == best_value :
+        if len(value) == best_value :
             temp_list.append(event)
     
     ret_index = random.randint(0,len(temp_list)-1)
     return temp_list[ret_index], temp[temp_list[ret_index]]
 
-def get_possible_slots(event):
+def get_possible_slots(event, SLOTS):
     # each elements is [slot id, current number os events, [available rooms id]]
     ret = []
     for slot in SLOTS:
@@ -156,27 +138,18 @@ def get_possible_slots(event):
                     flag = False
             
             if flag:
-                print(event.rooms, rooms)
-                ret.append([slot.id, len(rooms), set(event.rooms)-set(rooms)])
+                ret.append([slot.id, len(events), list(set(event.rooms)-set(list(rooms)))])
 
     ret.sort(key=lambda x: x[1], reverse=True)
     return ret
 
 
-getRandomSolution()
-# # print(INCIDENCE[0])
-# SLOTS[0].event_room[EVENTS[3].id] = EVENTS[3].rooms[0]
-# SLOTS[2].event_room[EVENTS[2].id] = EVENTS[2].rooms[0]
-# print(get_possible_slots(EVENTS[0]))
+s = getRandomSolution()
 
-        
+for x in s:
+    print(x.id, x.event_room)
 
-
-# getRandomSolution()
-
-# for x in SLOTS:
-#     print(x.id, x.event_room)
-
+write_to_file(s, num_events)
 
 # print(filename)
 # print(timeslots)
