@@ -14,6 +14,8 @@ class Student:
 class Event:
     id = -1
     features = None
+    num_students = 0
+    rooms = None
 
 ROOMS = []
 STUDENTS = []
@@ -49,7 +51,17 @@ for i, features in enumerate(events_features):
             e.features.append(j)
     EVENTS.append(e)
 
+for event in EVENTS :
+    for student in STUDENTS :
+        if event.id in student.events :
+            event.num_students += 1
+    event.rooms = []
+    for room in ROOMS :
+        if (room.size >= event.num_students) and (set(event.features).issubset(set(room.features))):
+            event.rooms.append(room.id)
 
+for event in EVENTS :
+    print(event.id, event.features, event.num_students, event.rooms)
 
 # print(filename)
 # print(timeslots)
