@@ -120,10 +120,15 @@ def getRandomSolution() :
     available_events = EVENTS[:]
     while len(available_events) > 0:
         temp, slots = get_best_event(available_events)
+        if len(slots) == 0:
+            available_events = EVENTS[:]
+            continue
         available_events.remove(temp)
-        slot = slots[random.randint(0, len(slots)-1)]
-        SLOTS[slot].event_room[temp.id] = temp.rooms[random.randint(0, len(temp.rooms)-1)]
-        
+        # slot = slots[random.randint(0, len(slots)-1)]
+        slot = slots[0][0] #selects the slot with the biggest number os rooms
+        SLOTS[slot].event_room[temp.id] = list(slots[2])[random.randint(0, len(slots[2])-1)]
+
+    
 def get_best_event(available_events) :
     temp = {}
     for event in available_events :
@@ -139,23 +144,25 @@ def get_best_event(available_events) :
     return temp_list[ret_index], temp[temp_list[ret_index]]
 
 def get_possible_slots(event):
+    # each elements is [slot id, current number os events, [available rooms id]]
     ret = []
     for slot in SLOTS:
         flag = True
         events = slot.event_room.keys()
         rooms = slot.event_room.values()
-        if not all(r in rooms for r1 in event.rooms):
+        if not all(r in rooms for r in event.rooms):
             for event_id in events:
                 if not INCIDENCE[event.id][EVENTS[event_id].id]:
                     flag = False
-                    break
-        
-        if flag:
-            ret.append(slot.id)
-
-    return ret
-        
             
+            if flag:
+                print(event.rooms, rooms)
+                ret.append([slot.id, len(rooms), set(event.rooms)-set(rooms)])
+
+    ret.sort(key=lambda x: x[1], reverse=True)
+    return ret
+
+
 getRandomSolution()
 # # print(INCIDENCE[0])
 # SLOTS[0].event_room[EVENTS[3].id] = EVENTS[3].rooms[0]
