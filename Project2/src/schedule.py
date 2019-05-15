@@ -121,10 +121,9 @@ def getRandomSolution() :
     while len(available_events) > 0:
         temp, slots = get_best_event(available_events)
         available_events.remove(temp)
-        slot = slots[random.randint(0, len(slots)-1)]        
+        slot = slots[random.randint(0, len(slots)-1)]
+        SLOTS[slot].event_room[temp.id] = temp.rooms[random.randint(0, len(temp.rooms)-1)]
         
-        # print(temp.id)
-
 def get_best_event(available_events) :
     temp = {}
     for event in available_events :
