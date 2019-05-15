@@ -1,7 +1,7 @@
 import math
 import random
 
-MAX_ATTEMPS = 1000000
+MAX_ATTEMPS = 100000
 
 # algoritmos Subida da Colina / hill-climbing
 # algoritmo de arrefecimento simulado / Simulated Annealing
@@ -42,11 +42,12 @@ def value(node) :
 # – O estado corrente é a solução
 def hill_climbing() :
     current = getRandomNode()
-    while True :
+    for i in range (1, MAX_ATTEMPS) :
         neighbor = getBestNeighbor(current)
         if value(neighbor) <= value(current) :
             return current
         current = neighbor
+    return current
 
 # – Semelhante ao Hill-Climbing Search mas admite explorar vizinhos piores 
 # – Temperatura que vai sendo sucessivamente reduzida define a probabilidade de aceitar soluções piores
