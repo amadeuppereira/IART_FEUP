@@ -3,6 +3,7 @@ from settings import *
 from input import *
 from output import *
 import random
+import copy as cp
 
 
 class Room:
@@ -94,7 +95,6 @@ class Slot:
     # event_room[event_id] = room_id
     event_room = None
 
-
 def get_best_event(available_events, SLOTS):
     temp = {}
     for event in available_events:
@@ -108,7 +108,6 @@ def get_best_event(available_events, SLOTS):
 
     ret_index = random.randint(0, len(temp_list)-1)
     return temp_list[ret_index], temp[temp_list[ret_index]]
-
 
 def get_possible_slots(event, SLOTS):
     # each elements is [slot id, current number os events, [available rooms id]]
@@ -129,7 +128,6 @@ def get_possible_slots(event, SLOTS):
     ret.sort(key=lambda x: x[1], reverse=True)
     return ret
 
-
 def getRandomSolution():
     SLOTS = []
     for i in range(0, timeslots):
@@ -142,8 +140,11 @@ def getRandomSolution():
     while len(available_events) > 0:
         temp, slots = get_best_event(available_events, SLOTS)
         if len(slots) == 0:
-            available_events = EVENTS[:]
-            continue
+            print("Restarting random solution generator...")
+            # available_events = EVENTS[:]
+            # SLOTS = []
+            # continue
+            return getRandomSolution()
         available_events.remove(temp)
         # slot = slots[random.randint(0, len(slots)-1)]
         # selects the slot with the biggest number of rooms
@@ -154,26 +155,28 @@ def getRandomSolution():
 
     return SLOTS
 
-
 def getAllNeighbours(solution):
     ret = []
-    for slot in solution:
-        for event, room in slot.event_room:
-            
+    for i, slot1 in enumerate(solution):
+        for event, room in slot1.event_room.items():
+            for j, slot2 in enumerate(solution):
+                print(i, event, j)
+                temp = cp.deepcopy(solution)
+                temp[i].event_room.pop(event)
+                temp[j].event_room[event] = room
+                if isSolutionFeasible(temp):
+                    ret.append(temp)
 
-    print("All neighbours")
+    print(ret)
 
-
-def getBestNeighbour(solution):
-    neighbours = getAllNeighbours(solution)
-    # TODO: not sure if right
-    return min(neighbours, key=lambda x: value(x))
-
+# def getBestNeighbour(solution):
+#     neighbours = getAllNeighbours(solution)
+#     # TODO: not sure if right
+#     return min(neighbours, key=lambda x: value(x))
 
 def getRandomNeighbour(solution):
     neighbours = getAllNeighbours(solution)
     return neighbours[random.randint(0, len(neighbours)-1)]
-
 
 def isSolutionFeasible(solution):
     eventrooms = []
@@ -218,7 +221,6 @@ def isSolutionFeasible(solution):
                 roomclashes += 1
 
     return (unplaced+unsuitablerooms+studentclashes+roomclashes) == 0
-
 
 def value(solution):
     eventslots = []
@@ -278,14 +280,41 @@ def value(solution):
     # Sum the three counts to give the solution score - smaller is better - zero is always possible with the instances in this competition.
     return longintensive + single + endofday
 
+def removeEvent(aloc, e):
+    for s in aloc:
+        if s.event_room.keys().contains(e):
+            s.event_room.pop(e)
+            return s.id
+
+# def addEvent(aloc, e, s):
+#     aloc[s].event_room[e]
+
+def getBestNeighbour(initial):
+    initial_copy = cp.deepcopy(initial)
+    best_aloc = initial
+    best_value = value(initial)
+
+    for e in EVENTS:
+        e_slot = removeEvent(initial_copy, e.id)
+        value_without_e = value(initial_copy)
+        for s in range(timeslots):
+            #add(initial_copy, e, s)
+            new_value = value(initial_copy)
+            if new_value < best_value:
+                best_aloc = cp.deepcopy(initial_copy)
+                best_value = new_value
+            
+            remove(initial_copy, e, s)
+        
+        add(initial_copy, e, e_slot)
+    
+    return best_aloc, best_value
+
+
+
 
 # s = getRandomSolution()
-
 # for x in s:
 #     print(x.id, x.event_room)
 
-# print("VALUE", value(s))
-
-# print("SOLUTION FEASIBLE", isSolutionFeasible(s))
-
-# write_to_file(s, num_events)
+# getAllNeighbours(s)
