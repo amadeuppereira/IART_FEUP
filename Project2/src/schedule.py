@@ -157,7 +157,9 @@ def getRandomSolution():
 
 def getAllNeighbours(solution):
     ret = []
-    # TODO: amadeu
+    for slot in solution:
+        for event, room in slot.event_room:
+            
 
     print("All neighbours")
 
