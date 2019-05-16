@@ -169,11 +169,6 @@ def getAllNeighbours(solution):
 
     print(ret)
 
-# def getBestNeighbour(solution):
-#     neighbours = getAllNeighbours(solution)
-#     # TODO: not sure if right
-#     return min(neighbours, key=lambda x: value(x))
-
 def getRandomNeighbour(solution):
     neighbours = getAllNeighbours(solution)
     return neighbours[random.randint(0, len(neighbours)-1)]
@@ -280,14 +275,18 @@ def value(solution):
     # Sum the three counts to give the solution score - smaller is better - zero is always possible with the instances in this competition.
     return longintensive + single + endofday
 
-def removeEvent(aloc, e):
+def removeEvent(aloc, event):
     for s in aloc:
-        if s.event_room.keys().contains(e):
-            s.event_room.pop(e)
-            return s.id
+        if event in s.event_room.keys():
+            room = s.event_room[event]
+            s.event_room.pop(event)
+            return s.id, room
 
-# def addEvent(aloc, e, s):
-#     aloc[s].event_room[e]
+def addEventToSlot(aloc, event, slot, room):
+    aloc[slot].event_room[event] = room
+
+def removeEventFromSlot(aloc, event, slot):
+    aloc[slot].event_room.pop(event)
 
 def getBestNeighbour(initial):
     initial_copy = cp.deepcopy(initial)
@@ -295,26 +294,34 @@ def getBestNeighbour(initial):
     best_value = value(initial)
 
     for e in EVENTS:
-        e_slot = removeEvent(initial_copy, e.id)
-        value_without_e = value(initial_copy)
-        for s in range(timeslots):
-            #add(initial_copy, e, s)
-            new_value = value(initial_copy)
-            if new_value < best_value:
-                best_aloc = cp.deepcopy(initial_copy)
-                best_value = new_value
-            
-            remove(initial_copy, e, s)
+        print("Moving event {}".format(e.id))
+        e_slot, e_room = removeEvent(initial_copy, e.id)
+        e_possible_slots = get_possible_slots(e, initial_copy)
+        for i, s in enumerate(e_possible_slots):
+            for r in e_possible_slots[i][2]:
+                addEventToSlot(initial_copy, e.id, s[0], r)
+                new_value = value(initial_copy)
+                if new_value < best_value:
+                    best_aloc = cp.deepcopy(initial_copy)
+                    best_value = new_value
+                
+                removeEventFromSlot(initial_copy, e.id, s[0])
         
-        add(initial_copy, e, e_slot)
+        addEventToSlot(initial_copy, e.id, e_slot, e_room)
     
     return best_aloc, best_value
 
 
 
 
-# s = getRandomSolution()
-# for x in s:
-#     print(x.id, x.event_room)
+s = getRandomSolution()
+for x in s:
+    print(x.id, x.event_room)
+
+s1, v = getBestNeighbour(s)
+for x in s:
+    print(x.id, x.event_room)
+print(v)
+
 
 # getAllNeighbours(s)
