@@ -1,6 +1,6 @@
 from settings import *
 
-input_file = open(filename + ".tim","r") 
+input_file = open(filename + ".tim", "r")
 
 first_line = input_file.readline().split()
 num_events = int(first_line[0])
@@ -9,7 +9,7 @@ num_features = int(first_line[2])
 num_students = int(first_line[3])
 
 rooms = []
-for i in range(0, num_rooms) :
+for i in range(0, num_rooms):
     rooms.append(int(input_file.readline()))
 
 
@@ -17,10 +17,11 @@ for i in range(0, num_rooms) :
 # if 0 the students does not attend the event
 # if 1 the students attends the event
 students_events = []
-for i in range(0, num_students) :
+for i in range(0, num_students):
     events_temp = []
-    for j in range(0, num_events) :
-        events_temp.append(int(input_file.readline()))
+    for j in range(0, num_events):
+        num = int(input_file.readline())
+        events_temp.append(num)
     students_events.append(events_temp)
 
 
@@ -28,9 +29,9 @@ for i in range(0, num_students) :
 # if 0 the room does not satisfy the feature
 # if 1 the room satisfies the feature
 rooms_features = []
-for i in range(0, num_rooms) :
+for i in range(0, num_rooms):
     features_temp = []
-    for j in range(0, num_features) :
+    for j in range(0, num_features):
         features_temp.append(int(input_file.readline()))
     rooms_features.append(features_temp)
 
@@ -39,8 +40,8 @@ for i in range(0, num_rooms) :
 # if 0 the event does not require the feature
 # if 1 the event requires the feature
 events_features = []
-for i in range(0, num_events) :
+for i in range(0, num_events):
     features_temp = []
-    for j in range(0, num_features) :
+    for j in range(0, num_features):
         features_temp.append(int(input_file.readline()))
     events_features.append(features_temp)

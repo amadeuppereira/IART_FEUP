@@ -1,22 +1,27 @@
+import numpy as np
 from settings import *
 from input import *
 from output import *
 import random
+
 
 class Room:
     id = -1
     size = 0
     features = None
 
+
 class Student:
     id = -1
     events = None
+
 
 class Event:
     id = -1
     features = None
     students = None
     rooms = None
+
 
 ROOMS = []
 STUDENTS = []
@@ -27,7 +32,7 @@ for i, size in enumerate(rooms):
     r.id = i
     r.size = size
     ROOMS.append(r)
-    
+
 for i, events in enumerate(students_events):
     s = Student()
     s.id = i
@@ -53,14 +58,14 @@ for i, features in enumerate(events_features):
     EVENTS.append(e)
 
 # Get possible rooms for all events
-for event in EVENTS :
+for event in EVENTS:
     event.students = []
-    for student in STUDENTS :
-        if event.id in student.events :
+    for student in STUDENTS:
+        if event.id in student.events:
             event.students.append(student.id)
 
     event.rooms = []
-    for room in ROOMS :
+    for room in ROOMS:
         if (room.size >= len(event.students)) and (set(event.features).issubset(set(room.features))):
             event.rooms.append(room.id)
 
@@ -82,15 +87,17 @@ for e1 in EVENTS:
 # for x in INCIDENCE:
 #     print(x)
 
+
 class Slot:
     id = -1
     # event_room = {}
     # event_room[event_id] = room_id
     event_room = None
 
-def getRandomSolution() :
+
+def getRandomSolution():
     SLOTS = []
-    for i in range (0, timeslots) :
+    for i in range(0, timeslots):
         slot = Slot()
         slot.id = i
         slot.event_room = {}
@@ -104,26 +111,29 @@ def getRandomSolution() :
             continue
         available_events.remove(temp)
         # slot = slots[random.randint(0, len(slots)-1)]
-        slot_id = slots[0][0] #selects the slot with the biggest number of rooms
+        # selects the slot with the biggest number of rooms
+        slot_id = slots[0][0]
 
-        SLOTS[slot_id].event_room[temp.id] = slots[0][2][random.randint(0, len(slots[0][2])-1)]
+        SLOTS[slot_id].event_room[temp.id] = slots[0][2][random.randint(
+            0, len(slots[0][2])-1)]
 
     return SLOTS
 
-    
-def get_best_event(available_events, SLOTS) :
+
+def get_best_event(available_events, SLOTS):
     temp = {}
-    for event in available_events :
+    for event in available_events:
         temp[event] = get_possible_slots(event, SLOTS)
     best_value = len(min(temp.values(), key=lambda x: len(x)))
-    
+
     temp_list = []
-    for event, value in temp.items() :
-        if len(value) == best_value :
+    for event, value in temp.items():
+        if len(value) == best_value:
             temp_list.append(event)
-    
-    ret_index = random.randint(0,len(temp_list)-1)
+
+    ret_index = random.randint(0, len(temp_list)-1)
     return temp_list[ret_index], temp[temp_list[ret_index]]
+
 
 def get_possible_slots(event, SLOTS):
     # each elements is [slot id, current number os events, [available rooms id]]
@@ -136,20 +146,78 @@ def get_possible_slots(event, SLOTS):
             for event_id in events:
                 if not INCIDENCE[event.id][EVENTS[event_id].id]:
                     flag = False
-            
+
             if flag:
-                ret.append([slot.id, len(events), list(set(event.rooms)-set(list(rooms)))])
+                ret.append([slot.id, len(events), list(
+                    set(event.rooms)-set(list(rooms)))])
 
     ret.sort(key=lambda x: x[1], reverse=True)
     return ret
 
 
-s = getRandomSolution()
+def value(solution):
+    eventslots = []
+    for i in range(num_events):
+        for slot in solution:
+            if i in slot.event_room:
+                eventslots.append(slot.id)
 
-for x in s:
-    print(x.id, x.event_room)
+    studentavailability = np.full((45, num_students), True)
+    for g in range(0, num_students):
+        for e in range(0, num_events):
+            if students_events[g][e]:
+                studentavailability[eventslots[e]][g] = False
 
-write_to_file(s, num_events)
+    # Count the number of occurrences of a student having more than two classes consecutively (3 consecutively scores 1, 4 consecutively scores 2, 5 consecutively scores 3, etc). Classes at the end of the day followed by classes at the beginning of the next day do not count as consecutive.
+    longintensive = 0
+    for g in range(0, num_students):
+        for d in range(0, 5):
+            count = 0
+            for t in range(0, 9):
+                slot = d*9+t
+                if studentavailability[slot][g] == False:
+                    count += 1
+                else:
+                    count = 0
+                if count >= 3:
+                    longintensive += 1
 
-# print(filename)
-# print(timeslots)
+    # Count the number of occurences of a student having just one class on a day (e.g. count 2 if a student has two days with only one class).
+    single = 0
+    for g in range(0, num_students):
+        for d in range(0, 5):
+            count = 0
+            badslot = -1
+            for t in range(0, 9):
+                slot = d*9+t
+                if studentavailability[slot][g] == False:
+                    count += 1
+                    badslot = slot
+            if count == 1:
+                single += 1
+
+    # Count the number of occurrences of a student having a class in the last timeslot of the day.
+    endofday = 0
+    for g in range(0, num_students):
+        if studentavailability[8][g] == False:
+            endofday += 1
+        if studentavailability[17][g] == False:
+            endofday += 1
+        if studentavailability[26][g] == False:
+            endofday += 1
+        if studentavailability[35][g] == False:
+            endofday += 1
+        if studentavailability[44][g] == False:
+            endofday += 1
+
+    return longintensive + single + endofday
+
+
+# s = getRandomSolution()
+
+# for x in s:
+#     print(x.id, x.event_room)
+
+# print(value(s))
+
+# write_to_file(s, num_events)
