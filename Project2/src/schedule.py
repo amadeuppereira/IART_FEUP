@@ -282,8 +282,8 @@ def value(solution):
 # for x in s:
 #     print(x.id, x.event_room)
 
-# print(value(s))
+# print("VALUE", value(s))
 
-# print(isSolutionFeasible(s))
+# print("SOLUTION FEASIBLE", isSolutionFeasible(s))
 
 # write_to_file(s, num_events)
