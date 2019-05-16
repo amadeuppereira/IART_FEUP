@@ -142,10 +142,6 @@ long studentclashes=0;
 long roomclashes=0;
 for(int i=0;i<nostudents;i++)for(int e=0;e<45;e++)studentavailability[e][i]=true;
 
-for(int i = 0; i < noevents; i++){
-	cout << eventslots[i] << " ";
-}
-cout << endl;
 for(int g = 0; g<nostudents;g++)
    for(int e=0;e<noevents;e++)
    	{

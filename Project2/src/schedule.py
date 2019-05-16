@@ -95,31 +95,6 @@ class Slot:
     event_room = None
 
 
-def getRandomSolution():
-    SLOTS = []
-    for i in range(0, timeslots):
-        slot = Slot()
-        slot.id = i
-        slot.event_room = {}
-        SLOTS.append(slot)
-
-    available_events = EVENTS[:]
-    while len(available_events) > 0:
-        temp, slots = get_best_event(available_events, SLOTS)
-        if len(slots) == 0:
-            available_events = EVENTS[:]
-            continue
-        available_events.remove(temp)
-        # slot = slots[random.randint(0, len(slots)-1)]
-        # selects the slot with the biggest number of rooms
-        slot_id = slots[0][0]
-
-        SLOTS[slot_id].event_room[temp.id] = slots[0][2][random.randint(
-            0, len(slots[0][2])-1)]
-
-    return SLOTS
-
-
 def get_best_event(available_events, SLOTS):
     temp = {}
     for event in available_events:
@@ -153,6 +128,89 @@ def get_possible_slots(event, SLOTS):
 
     ret.sort(key=lambda x: x[1], reverse=True)
     return ret
+
+
+def getRandomSolution():
+    SLOTS = []
+    for i in range(0, timeslots):
+        slot = Slot()
+        slot.id = i
+        slot.event_room = {}
+        SLOTS.append(slot)
+
+    available_events = EVENTS[:]
+    while len(available_events) > 0:
+        temp, slots = get_best_event(available_events, SLOTS)
+        if len(slots) == 0:
+            available_events = EVENTS[:]
+            continue
+        available_events.remove(temp)
+        # slot = slots[random.randint(0, len(slots)-1)]
+        # selects the slot with the biggest number of rooms
+        slot_id = slots[0][0]
+
+        SLOTS[slot_id].event_room[temp.id] = slots[0][2][random.randint(
+            0, len(slots[0][2])-1)]
+
+    return SLOTS
+
+
+def getAllNeighbours(solution):
+    ret = []
+    # TODO: amadeu
+
+    print("All neighbours")
+
+
+def getBestNeighbour(solution):
+    neighbours = getAllNeighbours(solution)
+    # TODO: not sure if right
+    return min(neighbours, key=lambda x: value(x))
+
+
+def getRandomNeighbour(solution):
+    neighbours = getAllNeighbours(solution)
+    return neighbours[random.randint(0, len(neighbours)-1)]
+
+
+def isSolutionFeasible(solution):
+    # TODO:
+
+    eventrooms = []
+    for i in range(num_events):
+        for slot in solution:
+            if i in slot.event_room:
+                eventrooms.append(slot.event_room[i])
+
+    unplaced = 0
+    for i in range(0, num_events):
+        if eventrooms[i] == -1 or eventrooms[i] == -1:
+            unplaced += 1
+
+    unsuitablerooms = 0
+    for e in range(0, num_events):
+        size = 0
+        badroom = False
+        for g in range(0, num_students):
+            if students_events[g][e]:
+                size += 1
+        if eventrooms[e] != -1 and ROOMS[eventrooms[e]].size < size:
+            badroom = True
+        for f in range(0, num_features):
+            if eventrooms[e] != -1 and events_features[e][f] and not rooms_features[eventrooms[e]][f]:
+                badroom = True
+        if badroom:
+            unsuitablerooms += 1
+
+    studentclashes = 0
+    for g in range(0, num_students):
+        for e in range(0, num_events):
+            for f in range(0, e):
+                print("e quÊ crl")
+
+    roomclashes = 0
+
+    return (unplaced+unsuitablerooms+studentclashes+roomclashes) == 0
 
 
 def value(solution):
@@ -210,6 +268,7 @@ def value(solution):
         if studentavailability[44][g] == False:
             endofday += 1
 
+    # Sum the three counts to give the solution score - smaller is better - zero is always possible with the instances in this competition.
     return longintensive + single + endofday
 
 
