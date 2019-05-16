@@ -1,13 +1,15 @@
 from input import *
+from schedule import *
+
 import random
 import math
 
 class Gene:
 
-    def __init__(chromosome):
+    def __init__(self, chromosome):
         self.chromosome = chromosome
 
-    def mutate(probM):
+    def mutate(self, probM):
         mutatedC = self.chromosome
 
         for i in range(mutatedC):
@@ -19,3 +21,8 @@ class Gene:
                 mutatedC[i] = temp
 
         return Gene(mutatedC)
+
+    def getValue(self):
+        return value(self.chromosome)
+
+        
