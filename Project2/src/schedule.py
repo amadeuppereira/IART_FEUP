@@ -176,21 +176,21 @@ def getRandomNeighbour(solution):
 
 
 def isSolutionFeasible(solution):
-    # TODO:
-
     eventrooms = []
     for i in range(num_events):
         for slot in solution:
             if i in slot.event_room:
                 eventrooms.append(slot.event_room[i])
 
+    eventslots = []
     unplaced = 0
-    for i in range(0, num_events):
-        if eventrooms[i] == -1 or eventrooms[i] == -1:
-            unplaced += 1
-
     unsuitablerooms = 0
     for e in range(0, num_events):
+        for slot in solution:
+            if e in slot.event_room:
+                eventslots.append(slot.id)
+        if eventrooms[e] == -1 or eventrooms[e] == -1:
+            unplaced += 1
         size = 0
         badroom = False
         for g in range(0, num_students):
@@ -208,9 +208,14 @@ def isSolutionFeasible(solution):
     for g in range(0, num_students):
         for e in range(0, num_events):
             for f in range(0, e):
-                print("e quÊ crl")
+                if eventslots[e] != -1 and eventslots[f] != -1 and students_events[g][e] and students_events[g][f] and eventslots[e] == eventslots[f]:
+                    studentclashes += 1
 
     roomclashes = 0
+    for e in range(0, num_events) :
+        for f in range(0, e) :
+            if eventslots[e] != -1 and eventslots[f]!=-1 and eventrooms[e]!=-1 and eventrooms[f]!=-1 and eventslots[e]==eventslots[f] and eventrooms[e]==eventrooms[f] :
+                roomclashes += 1
 
     return (unplaced+unsuitablerooms+studentclashes+roomclashes) == 0
 
@@ -279,6 +284,8 @@ def value(solution):
 # for x in s:
 #     print(x.id, x.event_room)
 
-# print(value(s))
+# print("VALUE", value(s))
+
+# print("SOLUTION FEASIBLE", isSolutionFeasible(s))
 
 # write_to_file(s, num_events)
