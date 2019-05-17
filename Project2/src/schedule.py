@@ -339,7 +339,7 @@ def getBestNeighbour(initial):
 # Returns a random neighbour
 def getRandomNeighbour(initial):
     initial_copy = cp.deepcopy(initial)
-    event_id = random.randint(0, num_events)
+    event_id = random.randint(0, num_events-1)
     event = EVENTS[event_id]
     slot_id, slot_room = removeEvent(initial_copy, event_id)
 

@@ -4,7 +4,7 @@ from schedule import getRandomSolution, value, getBestNeighbour, getRandomNeighb
 from output import *
 from input import num_events
 
-MAX_ATTEMPS = 1000
+MAX_ATTEMPS = 10000
 
 
 # - Escolher um estado aleatoriamente do espaço de estados
@@ -61,19 +61,29 @@ def hill_climbing_improved():
 
 def simulated_annealing():
     current = getRandomSolution()
-    T = 100
+    T = 25000
+    alpha = 0.95
     for i in range(1, MAX_ATTEMPS):
         if T < 0:
             return current
         next = getRandomNeighbour(current)
-        ap = math.exp((value(next)-value(current))/T)
-        if ap > random.uniform(0, 1):
+        next_value = value(next)
+        current_value = value(current)
+        diff = next_value - current_value
+        print(i, "current value: ", current_value,
+              "---- probability:", math.exp(diff/T))
+        if diff > 0:
             current = next
-        T = T - (1/math.log(1+i))
+        elif math.exp(diff/T) > random.uniform(0, 1):
+            current = next
+        # T = T - (1/math.log(1+i))
+        T = T - alpha * i
     return current
 
 
-solution = hill_climbing_improved()
+# solution = hill_climbing_improved()
+solution = simulated_annealing()
+print(value(solution))
 
 for x in solution:
     print(x.id, x.event_room)
