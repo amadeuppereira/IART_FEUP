@@ -1,4 +1,6 @@
 from input import * 
+from chromosome import *
+
 import random
 import math
 
@@ -21,14 +23,11 @@ def fisherYatesSwap(sequence, index):
 
 class Poputalion: 
  
-    def __init__(self, size, probC, probM): 
+    def __init__(self, size, seed, probC, probM): 
         self.probC = probC 
         self.probM = probM 
+        self.currentGroup = self.generate(size, seed)
 
-    
-
-
-print(shuffle([1,2,3,4], fisherYatesSwap))
-
-    
-
+    def generate(self, size, seed):
+        ret = [Chromosome(shuffle(seed, fisherYatesSwap)) for x in range(size)]
+        return ret
