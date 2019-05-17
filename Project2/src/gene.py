@@ -12,7 +12,7 @@ class Gene:
     def mutate(self, probM):
         mutatedC = self.chromosome
 
-        for i in range(mutatedC):
+        for i in len(mutatedC):
             if random.uniform(0,1) < probM:
                 randomIndex = math.floor(random.uniform(0,1) * range(mutatedC))
                 temp = mutatedC[randomIndex]
@@ -25,4 +25,3 @@ class Gene:
     def getValue(self):
         return value(self.chromosome)
 
-        
