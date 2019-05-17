@@ -4,6 +4,7 @@ from input import *
 from output import *
 import random
 import copy as cp
+import time
 
 
 class Room:
@@ -82,18 +83,13 @@ for e1 in EVENTS:
             if len(e2.rooms) == 1 and e1.rooms[0] == e2.rooms[0]:
                 INCIDENCE[e1.id][e2.id] = False
 
-# for x in EVENTS :
-#     print(x.id, x.rooms)
-
-# for x in INCIDENCE:
-#     print(x)
-
 
 class Slot:
     id = -1
     # event_room = {}
     # event_room[event_id] = room_id
     event_room = None
+
 
 def get_best_event(available_events, SLOTS):
     temp = {}
@@ -109,10 +105,11 @@ def get_best_event(available_events, SLOTS):
     ret_index = random.randint(0, len(temp_list)-1)
     return temp_list[ret_index], temp[temp_list[ret_index]]
 
-def get_possible_slots(event, SLOTS):
+
+def get_possible_slots(event, slots):
     # each elements is [slot id, current number os events, [available rooms id]]
     ret = []
-    for slot in SLOTS:
+    for slot in slots:
         flag = True
         events = slot.event_room.keys()
         rooms = slot.event_room.values()
@@ -127,6 +124,7 @@ def get_possible_slots(event, SLOTS):
 
     ret.sort(key=lambda x: x[1], reverse=True)
     return ret
+
 
 def getRandomSolution():
     SLOTS = []
@@ -155,6 +153,7 @@ def getRandomSolution():
 
     return SLOTS
 
+
 def getAllNeighbours(solution):
     ret = []
     for i, slot1 in enumerate(solution):
@@ -169,9 +168,6 @@ def getAllNeighbours(solution):
 
     print(ret)
 
-def getRandomNeighbour(solution):
-    neighbours = getAllNeighbours(solution)
-    return neighbours[random.randint(0, len(neighbours)-1)]
 
 def isSolutionFeasible(solution):
     eventrooms = []
@@ -188,7 +184,7 @@ def isSolutionFeasible(solution):
             if e in slot.event_room:
                 eventslots.append(slot.id)
         if eventrooms[e] == -1 or eventrooms[e] == -1:
-            unplaced += 1
+            return False
         size = 0
         badroom = False
         for g in range(0, num_students):
@@ -200,22 +196,23 @@ def isSolutionFeasible(solution):
             if eventrooms[e] != -1 and events_features[e][f] and not rooms_features[eventrooms[e]][f]:
                 badroom = True
         if badroom:
-            unsuitablerooms += 1
+            return False
 
     studentclashes = 0
     for g in range(0, num_students):
         for e in range(0, num_events):
             for f in range(0, e):
                 if eventslots[e] != -1 and eventslots[f] != -1 and students_events[g][e] and students_events[g][f] and eventslots[e] == eventslots[f]:
-                    studentclashes += 1
+                    return False
 
     roomclashes = 0
-    for e in range(0, num_events) :
-        for f in range(0, e) :
-            if eventslots[e] != -1 and eventslots[f]!=-1 and eventrooms[e]!=-1 and eventrooms[f]!=-1 and eventslots[e]==eventslots[f] and eventrooms[e]==eventrooms[f] :
-                roomclashes += 1
+    for e in range(0, num_events):
+        for f in range(0, e):
+            if eventslots[e] != -1 and eventslots[f] != -1 and eventrooms[e] != -1 and eventrooms[f] != -1 and eventslots[e] == eventslots[f] and eventrooms[e] == eventrooms[f]:
+                return False
 
-    return (unplaced+unsuitablerooms+studentclashes+roomclashes) == 0
+    return True
+
 
 def value(solution):
     eventslots = []
@@ -230,37 +227,27 @@ def value(solution):
             if students_events[g][e]:
                 studentavailability[eventslots[e]][g] = False
 
-    # Count the number of occurrences of a student having more than two classes consecutively (3 consecutively scores 1, 4 consecutively scores 2, 5 consecutively scores 3, etc). Classes at the end of the day followed by classes at the beginning of the next day do not count as consecutive.
     longintensive = 0
-    for g in range(0, num_students):
-        for d in range(0, 5):
-            count = 0
-            for t in range(0, 9):
-                slot = d*9+t
-                if studentavailability[slot][g] == False:
-                    count += 1
-                else:
-                    count = 0
-                if count >= 3:
-                    longintensive += 1
-
-    # Count the number of occurences of a student having just one class on a day (e.g. count 2 if a student has two days with only one class).
     single = 0
+    endofday = 0
     for g in range(0, num_students):
         for d in range(0, 5):
-            count = 0
+            countA = 0
+            countB = 0
             badslot = -1
             for t in range(0, 9):
                 slot = d*9+t
                 if studentavailability[slot][g] == False:
-                    count += 1
+                    countA += 1
+                    countB += 1
                     badslot = slot
-            if count == 1:
+                else:
+                    countA = 0
+                if countA >= 3:
+                    longintensive += 1
+            if countB == 1:
                 single += 1
 
-    # Count the number of occurrences of a student having a class in the last timeslot of the day.
-    endofday = 0
-    for g in range(0, num_students):
         if studentavailability[8][g] == False:
             endofday += 1
         if studentavailability[17][g] == False:
@@ -272,26 +259,52 @@ def value(solution):
         if studentavailability[44][g] == False:
             endofday += 1
 
-    # Sum the three counts to give the solution score - smaller is better - zero is always possible with the instances in this competition.
     return longintensive + single + endofday
+
 
 def removeEvent(aloc, event):
     for s in aloc:
         if event in s.event_room.keys():
-            room = s.event_room[event]
-            s.event_room.pop(event)
+            room = s.event_room.pop(event)
             return s.id, room
+
 
 def addEventToSlot(aloc, event, slot, room):
     aloc[slot].event_room[event] = room
 
+
 def removeEventFromSlot(aloc, event, slot):
     aloc[slot].event_room.pop(event)
 
+
+# def getBestNeighbour(initial):
+#     initial_copy = cp.deepcopy(initial)
+#     best_aloc = initial
+#     best_value = value(initial)
+
+#     for e in EVENTS:
+#         print("Moving event {}".format(e.id))
+#         e_slot, e_room = removeEvent(initial_copy, e.id)
+#         e_possible_slots = get_possible_slots(e, initial_copy)
+#         for i, s in enumerate(e_possible_slots):
+#             for r in e_possible_slots[i][2]:
+#                 addEventToSlot(initial_copy, e.id, s[0], r)
+#                 new_value = value(initial_copy)
+#                 if new_value < best_value:
+#                     best_aloc = cp.deepcopy(initial_copy)
+#                     best_value = new_value
+
+#                 removeEventFromSlot(initial_copy, e.id, s[0])
+
+#         addEventToSlot(initial_copy, e.id, e_slot, e_room)
+
+#     return best_aloc, best_value
+
 def getBestNeighbour(initial):
     initial_copy = cp.deepcopy(initial)
-    best_aloc = initial
     best_value = value(initial)
+
+    best = []
 
     for e in EVENTS:
         print("Moving event {}".format(e.id))
@@ -302,26 +315,93 @@ def getBestNeighbour(initial):
                 addEventToSlot(initial_copy, e.id, s[0], r)
                 new_value = value(initial_copy)
                 if new_value < best_value:
-                    best_aloc = cp.deepcopy(initial_copy)
                     best_value = new_value
-                
+                    best.append([cp.deepcopy(initial_copy), new_value])
+                elif new_value == best_value:
+                    best.append([cp.deepcopy(initial_copy), new_value])
+
                 removeEventFromSlot(initial_copy, e.id, s[0])
-        
+
         addEventToSlot(initial_copy, e.id, e_slot, e_room)
-    
+
+    if initial in best:
+        best.pop(initial)
+
+    best_list = [k for k, v in best if v == best_value]
+    if len(best_list) == 0:
+        return initial, best_value
+
+    best_aloc = best_list[random.randint(0, len(best_list)-1)]
+
     return best_aloc, best_value
 
 
+# Returns a random neighbour
+def getRandomNeighbour(initial):
+    initial_copy = cp.deepcopy(initial)
+    event_id = random.randint(0, num_events)
+    event = EVENTS[event_id]
+    slot_id, slot_room = removeEvent(initial_copy, event_id)
+
+    possible_slots = get_possible_slots(event, initial_copy)
+    if len(possible_slots) == 0:
+        getRandomNeighbour(initial)
+    slot = possible_slots[random.randint(0, len(possible_slots)-1)]
+    if len(slot[2]) == 0:
+        getRandomNeighbour(initial)
+    room = slot[2][random.randint(0, len(slot[2])-1)]
+
+    addEventToSlot(initial_copy, event_id, slot[0], room)
+    return initial_copy
 
 
-s = getRandomSolution()
-for x in s:
-    print(x.id, x.event_room)
+# Returns a random neighbour that has a better value than initial_value
+def getBetterRandomNeighbour(initial, initial_value, max_attemps):
+    if max_attemps == 0:
+        return initial, initial_value
 
-s1, v = getBestNeighbour(s)
-for x in s:
-    print(x.id, x.event_room)
-print(v)
+    new_attemps = max_attemps - 1
 
+    initial_copy = cp.deepcopy(initial)
+    event_id = random.randint(0, num_events-1)
+    event = EVENTS[event_id]
+    slot_id, slot_room = removeEvent(initial_copy, event_id)
+
+    possible_slots = get_possible_slots(event, initial_copy)
+    if len(possible_slots) == 0:
+
+        return getBetterRandomNeighbour(initial, initial_value, new_attemps)
+    slot = possible_slots[random.randint(0, len(possible_slots)-1)]
+    if len(slot[2]) == 0:
+        return getBetterRandomNeighbour(initial, initial_value, new_attemps)
+    room = slot[2][random.randint(0, len(slot[2])-1)]
+
+    addEventToSlot(initial_copy, event_id, slot[0], room)
+
+    copy_value = value(initial_copy)
+    if copy_value >= initial_value:
+        return getBetterRandomNeighbour(initial, initial_value, new_attemps)
+
+    return initial_copy, copy_value
+
+
+# s = getRandomSolution()
+# print(value(s))
+# random, random_value = getRandomNeighbour(s, value(s))
+# print(random_value)
+
+
+# getBestNeighbour2(s)
+
+# print(isSolutionFeasible(s))
+
+# for x in s:
+#     print(x.id, x.event_room)
+# print(value(s))
+
+# s1, v = getBestNeighbour(s)
+# for x in s:
+#     print(x.id, x.event_room)
+# print(v)
 
 # getAllNeighbours(s)
