@@ -61,8 +61,7 @@ def hill_climbing_improved():
 
 def simulated_annealing():
     current = getRandomSolution()
-    T = 25000
-    alpha = 0.95
+    T = 30
     for i in range(1, MAX_ATTEMPS):
         if T < 0:
             return current
@@ -70,14 +69,13 @@ def simulated_annealing():
         next_value = value(next)
         current_value = value(current)
         diff = next_value - current_value
-        print(i, "current value: ", current_value,
-              "---- probability:", math.exp(diff/T))
-        if diff > 0:
+        print("Current Value", current_value, "----- Temperature",
+              T, "----- Probability", math.exp(-diff/T))
+        if diff < 0:
             current = next
-        elif math.exp(diff/T) > random.uniform(0, 1):
+        elif math.exp(-diff/T) > random.uniform(0, 1):
             current = next
-        # T = T - (1/math.log(1+i))
-        T = T - alpha * i
+        T = T - ((1/math.log(1+i))*0.1)
     return current
 
 
