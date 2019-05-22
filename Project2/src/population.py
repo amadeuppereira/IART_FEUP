@@ -40,25 +40,32 @@ class Poputalion:
         return self.currentGroup[index]
 
     def crossover(self, mom, dad):
-        cut_mom = random.randint(1, len(mom)-1)
-        cut_dad = random.randint(1, len(dad)-1)
+        cut_mom = random.randint(1, len(mom.gene)-1)
+        cut_dad = random.randint(1, len(dad.gene)-1)
 
         start = min(cut_mom, cut_dad)
         end = max(cut_mom, cut_dad)
 
-        child1part1 = mom[0:start]
-        child1part2 = mom[end+1:]
+        child1part1 = mom.gene[0:start]
+        child1part2 = mom.gene[end+1:]
 
-        child2part1 = dad[0:start]
-        child2part2 = dad[end+1:]
+        child2part1 = dad.gene[0:start]
+        child2part2 = dad.gene[end+1:]
 
-        child1 = child1part1 + dad[start:end+1] + child1part2
-        child2 = child2part1 + mom[start:end+1] + child2part2
+        child1 = child1part1 + dad.gene[start:end+1] + child1part2
+        child2 = child2part1 + mom.gene[start:end+1] + child2part2
 
-        return [child1,child2]
+
+        return [Chromosome(child1),Chromosome(child2)]
 
 p = Poputalion(1, getRandomSolution() , 0.3, 0.4)
 g = Chromosome(getRandomSolution())
 g1 = Chromosome(getRandomSolution())
+children = p.crossover(g,g1)
+
+print(isSolutionFeasible(children[0].gene))
+print(isSolutionFeasible(children[1].gene))
+
+print('parents:')
 print(g.fitness())
 print(g1.fitness())
