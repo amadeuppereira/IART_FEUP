@@ -22,5 +22,5 @@ class Chromosome:
 
         return Chromosome(mutatedG)
 
-    def getValue(self):
+    def fitness(self):
         return value(self.gene)

@@ -107,7 +107,7 @@ def get_best_event(available_events, SLOTS):
 
 
 def get_possible_slots(event, slots):
-    # each elements is [slot id, current number os events, [available rooms id]]
+    # each elements is [slot id, current number of events, [available rooms id]]
     ret = []
     for slot in slots:
         flag = True
