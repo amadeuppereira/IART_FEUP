@@ -1,4 +1,5 @@
-from input import ROOMS, STUDENTS, EVENTS
+from input import ROOMS, STUDENTS, EVENTS, num_events, num_students
+import numpy as np
 
 class Helper:
     def __init__(self):
@@ -40,3 +41,4 @@ class Helper:
 
     def isCompatible(self, id1, id2):
         return self.incidence[id1][id2]
+
