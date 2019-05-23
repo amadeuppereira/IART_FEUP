@@ -39,6 +39,9 @@ class Helper:
     def getEventRooms(self, id):
         return self.event_rooms[id]
 
+    def getEventStudents(self, id):
+        return self.event_students[id]
+
     def isCompatible(self, id1, id2):
         return self.incidence[id1][id2]
 

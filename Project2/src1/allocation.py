@@ -47,6 +47,7 @@ class Allocation:
         self.slots[slot].remove(event)
 
     def isFeasible(self):
+        used_events = set()
         for _, slot in self.slots.items():
             used_rooms = []
             students = []
@@ -54,13 +55,41 @@ class Allocation:
                 if room in helper.getEventRooms(event) and room not in used_rooms:
                     used_rooms.append(room)
                 else:
-                    print(room, slot.id)
                     return False
-            
-        return True
+
+                for s in helper.getEventStudents(event):
+                    if s in students:
+                        return False
+                    students.append(s)
+
+                used_events.add(event)
+
+
+        return len(used_events) == len(EVENTS)
                 
 
+def test(slots):
+    ret = []
+    for _, slot in slots.items():
+        students = []
+        for event, _ in slot.distribution.items():
+            for s in helper.getEventStudents(event):
+                if s in students:
+                    return False
+                students.append(s)
+        ret.append(students)
 
+    return True
+
+def test1(slot):
+    students = []
+    for event, _ in slot.distribution.items():
+        for s in helper.getEventStudents(event):
+            if s in students:
+                return False
+            students.append(s)
+
+    return True
 
 
 # ----- ----- ----- ----- ----- -----
@@ -91,7 +120,7 @@ def generateRandomAllocation():
     unassignedEvents = []
     slots = alloc.getValuableSlots()
     
-    for e in EVENTS[:]:
+    for e in EVENTS:
         possibleSlots = getPossibleSlots(e, slots)
         if len(possibleSlots) > 0:
             alloc.allocate(possibleSlots[0], e.id)
@@ -113,7 +142,7 @@ def generateRandomAllocation():
     for e in unassignedEvents.copy():
         if tryPlaceEvent(e, slots):
             unassignedEvents.remove(e)
-
+    
     shuffleSlots(slots, unassignedEvents)
 
     best = slots, unassignedEvents
@@ -121,19 +150,22 @@ def generateRandomAllocation():
         print("Blowing up {}/{} ({} unassigned events)".format(i, 100, len(best[1])))
         temp_best = best
         for _ in range(5):
-            slotsCopy = cp.deepcopy(best[0])
-            uaCopy = best[1].copy()
+            slotsCopy = cp.deepcopy(temp_best[0])
+            uaCopy = temp_best[1].copy()
             blowupSlots(slotsCopy, uaCopy)
-            if len(uaCopy) < len(best[1]):
-                temp_best = slotsCopy, uaCopy
+            if len(uaCopy) < len(temp_best[1]):
+                temp_best = (slotsCopy, uaCopy)
 
         best = temp_best
         if len(best[1]) == 0:
             print("Finished blowing up!")
             break
 
-    unassignedEvents = best[1]
     slots = best[0]
+    unassignedEvents = best[1]
+
+    # print("-------------")
+    # print(getNEvents(slots), len(unassignedEvents), getNEvents(slots) + len(unassignedEvents))
 
     if len(unassignedEvents) > 0:
         print("Opening end of the day slots")
@@ -147,33 +179,43 @@ def generateRandomAllocation():
     else:
         print("Allocation found!")
 
+    for i, s in slots.items():
+        alloc.slots[i] = s
+
     return alloc
 
 def blowupSlots(slots, unassignedEvents):
+    if len(unassignedEvents) == 0:
+        return
+
     e = random.choice(unassignedEvents)
     _, s = random.choice(list(slots.items()))
+
     temp = cp.deepcopy(s)
-    prevEvents = temp.distribution.keys()
+    prevEvents = list(s.distribution.keys()).copy()
     temp.distribution = {e: None}
-    unassignedEvents.remove(e)
+
+    for e1 in prevEvents: 
+        unassignedEvents.append(e1) 
     for prevE in prevEvents:
         if helper.isCompatible(prevE, e):
             temp.update(prevE, None)
-        else:
-            unassignedEvents.append(prevE)
 
+    
     matches = distributeEventRooms(temp)
+    s.distribution = {}
+
     for e1 in temp.distribution.keys():
         try:
             room = matches.index(e1)
             s.update(e1, room)
+            unassignedEvents.remove(e1)
         except ValueError:
-            unassignedEvents.append(e1)
-            s.remove(e1)
+            pass
 
-    for e in unassignedEvents.copy():
+    for e1 in unassignedEvents.copy():
         if tryPlaceEvent(e, slots):
-            unassignedEvents.remove(e)
+            unassignedEvents.remove(e1)
 
     shuffleSlots(slots, unassignedEvents, 5000)
 
@@ -190,23 +232,22 @@ def shuffleSlots(slots, unassignedEvents, n = 50000):
                 if n_allocated > len(s.distribution):
                     for e1 in temp.distribution.keys():
                         s.update(e1, matches.index(e1))
-
+                
                 elif n_allocated == len(s.distribution):
-                    # for ex in s.distribution.keys():
-                    #     unassignedEvents.append(ex)
-                    # s.distribution = {}
                     unplaced = []
                     for e1 in temp.distribution.keys():
                         try:
                             room = matches.index(e1)
                             s.update(e1, room)
-                            # unassignedEvents.remove(e1)
                         except ValueError:
                             unplaced.append(e1)
                             s.remove(e1)
                     for e1 in unplaced:
                         if not tryPlaceEvent(e1, slots):
-                                unassignedEvents.append(e1)
+                            unassignedEvents.append(e1)
+                
+                else:
+                    unassignedEvents.append(e)
 
 def tryPlaceEvent(eventid, slots):
     for s in slots.values():
@@ -243,58 +284,5 @@ def distributeEventRoomsHelper(id, matches, seen):
     return False
 
 
-
-alloc = generateRandomAllocation()
-print(alloc.isFeasible())
-print(alloc.slots)
-
-
-
-# eventrooms = []
-#         for i in range(len(EVENTS)):
-#             for _, slot in self.slots.items():
-#                 if i in slot.distribution:
-#                     eventrooms.append(slot.distribution[i])
-#                     break
-
-#         eventslots = []
-#         unplaced = 0
-#         unsuitablerooms = 0
-#         for e in EVENTS:
-#             for _, slot in self.slots.items():
-#                 if e.id in slot.distribution:
-#                     eventslots.append(slot.id)
-#             if eventrooms[e.id] == None:
-#                 print("eventrooms[e.id] == None")
-#                 print(e.id)
-#                 return False
-#             size = 0
-#             badroom = False
-#             for s in STUDENTS:
-#                 if e.id in s.events:
-#                     size += 1
-#             if eventrooms[e.id] != None and ROOMS[eventrooms[e.id]].size < size:
-#                 badroom = True
-#             for f in range(num_features):
-#                 if eventrooms[e.id] != None and f in e.features and not f in ROOMS[eventrooms[e.id]].features:
-#                     badroom = True
-#             if badroom:
-#                 print("badroom")
-#                 return False
-
-#         studentclashes = 0
-#         for g in range(len(STUDENTS)):
-#             for e in range(len(EVENTS)):
-#                 for f in range(e):
-#                     if eventslots[e] != None and eventslots[f] != None and e in STUDENTS[g].events and f in STUDENTS[g].events and eventslots[e] == eventslots[f]:
-#                         print("if eventslots[e] != -1 and eventslots[f] != -1 and e in STUDENTS[g].events and f in STUDENTS[g].events and eventslots[e] == eventslots[f]:")
-#                         return False
-
-#         roomclashes = 0
-#         for e in range(len(EVENTS)):
-#             for f in range(e):
-#                 if eventslots[e] != None and eventslots[f] != None and eventrooms[e] != None and eventrooms[f] != None and eventslots[e] == eventslots[f] and eventrooms[e] == eventrooms[f]:
-#                     print("if eventslots[e] != -1 and eventslots[f] != -1 and eventrooms[e] != -1 and eventrooms[f] != -1 and eventslots[e] == eventslots[f] and eventrooms[e] == eventrooms[f]:")
-#                     return False
-
-#         return True
+test = generateRandomAllocation()
+print(test.isFeasible())
