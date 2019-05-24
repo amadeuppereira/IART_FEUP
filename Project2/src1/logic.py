@@ -1,4 +1,5 @@
 from allocation import Allocation, generateRandomAllocation, getRandomNeighbour, getBestNeighbour
+from population import Population
 import math
 import random
 
@@ -35,9 +36,19 @@ def simulated_annealing():
         T = T - ((1/math.log(1+i))*0.1)
     return current
 
-
 # result = hill_climbing()
-result = simulated_annealing()
-result.writeToFile()
+# result = simulated_annealing()
+# result.writeToFile()
 
+SIZE = 50
+MUTATION_RATE = 0.1
+ELITISM = 5
 
+def genetic_algorithm():
+    population = Population(SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
+    for p in population:
+        print(p.value())
+    
+    print(population.currentValues)
+
+genetic_algorithm()
