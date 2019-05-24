@@ -1,0 +1,2 @@
+-Para correr o programa basta executar o ficheiro schedule.py que se encontra dentro da pasta "src" (python3 schedule.py). Ao correr este ficheiro vai aparecer um menu onde se pode escolher que algoritmo utilizar.
+- Para escolher o ficheiro de input que vai ser executado pelos algoritmos tem de se alterar a variável "FILENAME" dentro do ficheiro settings.py.
