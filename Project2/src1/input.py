@@ -1,4 +1,4 @@
-from settings import filename
+from settings import FILENAME
 
 class Room:
     def __init__(self, id, size, features = None):
@@ -31,7 +31,7 @@ EVENTS = []
 
 # ----- ----- ----- ----- ----- ----- ----- ----- -----
 
-input_file = open(filename + ".tim", "r")
+input_file = open(FILENAME + ".tim", "r")
 
 first_line = input_file.readline().split()
 num_events = int(first_line[0])

@@ -1,4 +1,4 @@
-from settings import TIMESLOTS, SLOTS_PER_DAY
+from settings import TIMESLOTS, SLOTS_PER_DAY, FILENAME
 from helper import Helper
 from input import EVENTS, ROOMS, STUDENTS, num_features
 import copy as cp
@@ -27,15 +27,21 @@ class Slot:
 class Allocation:
     def __init__(self, nslots):
         self.slots = {}
+        self.event_data = {}
         for i in range(nslots):
             self.slots[i] = Slot(i)
 
     def getValuableSlots(self):
         ret = {}
         for i in range(len(self.slots)):
-            if(i % (SLOTS_PER_DAY) != 8):
+            if(i % SLOTS_PER_DAY != SLOTS_PER_DAY - 1):
                 ret[i] = self.slots[i]
         return ret
+
+    def finish(self):
+        for slotid, slot in self.slots.items():
+            for eventid, room in slot.distribution.items():
+                self.event_data[eventid] = {'slot':slotid, 'room':room}
 
     def allocate(self, slot, event, room = None):
         self.slots[slot].update(event, room)
@@ -64,33 +70,77 @@ class Allocation:
 
                 used_events.add(event)
 
-
         return len(used_events) == len(EVENTS)
+
+    def value(self):
+        single_event = 0
+        end_of_day = 0
+        intensive = 0
+
+        if not self.event_data:
+            self.finish()
+
+        slot_counter = 0
+        for _ in range(int(TIMESLOTS / SLOTS_PER_DAY)):
+            students = [] 
+            for _ in range(SLOTS_PER_DAY):
+                slot = self.slots[slot_counter]
+                slot_counter += 1
+                for eventid, _ in slot.distribution.items():
+                    n_students = helper.getEventStudents(eventid)
+                    if slot.id % SLOTS_PER_DAY == SLOTS_PER_DAY - 1:
+                        end_of_day += len(n_students)
+                    students += n_students
+            single_event += len(list(filter(lambda x: students.count(x) == 1, students)))
+
+        for s in STUDENTS:
+            student_slots = []
+            for eventid in s.events:
+                student_slots.append(self.event_data[eventid]['slot'])
+
+            new_student_slots = []
+            for i in range(int(TIMESLOTS / SLOTS_PER_DAY)):
+                new_student_slots.append([])
+
+            for temp in student_slots:
+                idx = temp // SLOTS_PER_DAY
+                new_student_slots[idx].append(temp)
+            
+            for temp in new_student_slots:
+                temp.sort()
+
+            consecutives = []
+
+            for temp in new_student_slots:
+                if not temp:
+                    continue
+                previous = temp[0]
+                counter = 1
+                consecutives.append(counter)
+                for temp1 in temp[:]:
+                    if temp1 == previous + 1:
+                        consecutives.pop()
+                        counter += 1
+                        consecutives.append(counter)
+                    else:
+                        counter = 1
+                        consecutives.append(counter)
+                    previous = temp1
+
+            intensive += sum(list(map(lambda x: x-2 if x-2 > 0 else 0, consecutives)))
+
+        return single_event + end_of_day + intensive
+
+    def writeToFile(self):
+        output_file = open(FILENAME + ".sln", "w")
+        for i in range(len(EVENTS)):
+            for slot in self.slots.values():
+                if i in slot.distribution.keys():
+                    output_file.write(str(slot.id) + " " + str(slot.distribution[i]) + "\n")
+                    break
+
+        output_file.close()
                 
-
-def test(slots):
-    ret = []
-    for _, slot in slots.items():
-        students = []
-        for event, _ in slot.distribution.items():
-            for s in helper.getEventStudents(event):
-                if s in students:
-                    return False
-                students.append(s)
-        ret.append(students)
-
-    return True
-
-def test1(slot):
-    students = []
-    for event, _ in slot.distribution.items():
-        for s in helper.getEventStudents(event):
-            if s in students:
-                return False
-            students.append(s)
-
-    return True
-
 
 # ----- ----- ----- ----- ----- -----
 
@@ -149,7 +199,7 @@ def generateRandomAllocation():
     for i in range(100):
         print("Blowing up {}/{} ({} unassigned events)".format(i, 100, len(best[1])))
         temp_best = best
-        for _ in range(5):
+        for _ in range(3):
             slotsCopy = cp.deepcopy(temp_best[0])
             uaCopy = temp_best[1].copy()
             blowupSlots(slotsCopy, uaCopy)
@@ -164,8 +214,8 @@ def generateRandomAllocation():
     slots = best[0]
     unassignedEvents = best[1]
 
-    # print("-------------")
-    # print(getNEvents(slots), len(unassignedEvents), getNEvents(slots) + len(unassignedEvents))
+    for i, s in slots.items():
+        alloc.slots[i] = s
 
     if len(unassignedEvents) > 0:
         print("Opening end of the day slots")
@@ -173,15 +223,14 @@ def generateRandomAllocation():
             if tryPlaceEvent(e, alloc.slots):
                 unassignedEvents.remove(e)
 
-    if len(unassignedEvents) > 0:
+    if len(unassignedEvents) > 0 or not alloc.isFeasible():
         print("Couldn't find feasible allocation! Retrying...")
         return generateRandomAllocation()
     else:
         print("Allocation found!")
 
-    for i, s in slots.items():
-        alloc.slots[i] = s
 
+    alloc.finish()
     return alloc
 
 def blowupSlots(slots, unassignedEvents):
@@ -286,3 +335,5 @@ def distributeEventRoomsHelper(id, matches, seen):
 
 test = generateRandomAllocation()
 print(test.isFeasible())
+print(test.value())
+test.writeToFile()
