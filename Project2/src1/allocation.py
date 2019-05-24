@@ -275,8 +275,7 @@ def getRandomNeighbour(allocation):
     slot_id, slot_room = initial_copy.removeEvent1(event_id)
 
     # MOVE
-    # if random.randint(0, 1):
-    if False:
+    if random.randint(0, 1):
         possible_slots = getPossibleSlots(event, initial_copy.slots)
         if len(possible_slots) == 0:
             return getRandomNeighbour(allocation)
