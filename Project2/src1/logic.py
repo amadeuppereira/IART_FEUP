@@ -1,21 +1,39 @@
-from allocation import Allocation, generateRandomAllocation, getRandomNeighbour, getBestNeighbour
+from allocation import Allocation, generateRandomAllocation, getRandomNeighbour, getBestNeighbour, getBetterNeighbour
 from population import Population
 import math
 import random
 
 MAX_ATTEMPS = 10000
 
-def hill_climbing():
+
+def hill_climbing_1():
     print("Hill Climbing\n")
     current = generateRandomAllocation()
+    current_value = current.value()
     while(1):
-        current_value = current.value()
+        neighbour, neighbour_value = getBetterNeighbour(current)
+        print("Current: ", current_value)
+        print("Neighbour: ", neighbour_value)
+        if neighbour_value >= current_value:
+            print("Here")
+            return current
+        current = neighbour
+        current_value = neighbour_value
+
+
+def hill_climbing_2():
+    print("Hill Climbing\n")
+    current = generateRandomAllocation()
+    current_value = current.value()
+    while(1):
         neighbour, neighbour_value = getBestNeighbour(current)
         print("Current: ", current_value)
         print("Neighbour: ", neighbour_value)
         if neighbour_value >= current_value:
             return current
         current = neighbour
+        current_value = neighbour_value
+
 
 def simulated_annealing():
     print("Simulated Annealing\n")
@@ -28,7 +46,8 @@ def simulated_annealing():
         current_value = current.value()
         diff = neighbour_value - current_value
         probability = math.exp(-diff/T)
-        print("Current Value", current_value, "----- Temperature", T, "----- Probability", probability)
+        print("Current Value", current_value, "----- Temperature",
+              T, "----- Probability", probability)
         if diff < 0:
             current = neighbour
         elif probability > random.uniform(0, 1):
@@ -36,19 +55,25 @@ def simulated_annealing():
         T = T - ((1/math.log(1+i))*0.1)
     return current
 
+
 # result = hill_climbing()
+result = hill_climbing_2()
 # result = simulated_annealing()
-# result.writeToFile()
+result.writeToFile()
+
 
 SIZE = 50
 MUTATION_RATE = 0.1
 ELITISM = 5
 
+
 def genetic_algorithm():
-    population = Population(SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
+    population = Population(
+        SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
     for p in population:
         print(p.value())
-    
+
     print(population.currentValues)
 
-genetic_algorithm()
+
+# genetic_algorithm()
