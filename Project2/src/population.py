@@ -1,71 +1,104 @@
-from input import * 
-from chromosome import *
-from schedule import *
+from input import *
+from allocation import *
+from settings import *
 
 import random
 import math
 import operator
-#fisher yates shuffle algorithm
-
-def shuffle(sequence, swapFunc):
-    index = len(sequence)
-    while index != 0:
-        index -= 1
-        swapFunc(sequence, index)
-    return sequence
-
-def fisherYatesSwap(sequence, index):
-    rand = math.floor(random.uniform(0,1) * (index + 1))
-    tmp = sequence[index]
-    sequence[index] = sequence[rand]
-    sequence[rand] = tmp
-
-def rotateFromIndex(array, index):
-    return array[index+1:] + array[:index+1]
-
-class Poputalion: 
- 
-    def __init__(self, size, seed, probC, probM): 
-        self.probC = probC 
-        self.probM = probM 
-        self.currentGroup = self.generate(size, seed)
-        self.currentValues = list(map(lambda x: x.fitness(), self.currentGroup))
-
-    def generate(self, size, seed):
-        ret = [Chromosome(shuffle(seed, fisherYatesSwap)) for x in range(size)]
-        return ret
-
-    def getFittest(self):
-        index, value = max(enumerate(self.currentValues), key=operator.itemgetter(1))
-        return self.currentGroup[index]
-
-    def crossover(self, mom, dad):
-        cut_mom = random.randint(1, len(mom.gene)-1)
-        cut_dad = random.randint(1, len(dad.gene)-1)
-
-        start = min(cut_mom, cut_dad)
-        end = max(cut_mom, cut_dad)
-
-        child1part1 = mom.gene[0:start]
-        child1part2 = mom.gene[end+1:]
-
-        child2part1 = dad.gene[0:start]
-        child2part2 = dad.gene[end+1:]
-
-        child1 = child1part1 + dad.gene[start:end+1] + child1part2
-        child2 = child2part1 + mom.gene[start:end+1] + child2part2
+import numpy as np
 
 
-        return [Chromosome(child1),Chromosome(child2)]
+class Population:
 
-p = Poputalion(1, getRandomSolution() , 0.3, 0.4)
-g = Chromosome(getRandomSolution())
-g1 = Chromosome(getRandomSolution())
-children = p.crossover(g,g1)
+	def __init__(self, size, seed, probM, elitism):
+		self.elitism = elitism
+		self.probM = probM
+		self.currentGroup = self.generate(size, seed)
 
-print(isSolutionFeasible(children[0].gene))
-print(isSolutionFeasible(children[1].gene))
+	def generate(self, size, seed):
+		ret = [getRandomNeighbour(seed) for x in range(size)]
+		ret.sort(key = lambda x : x[1])
+		return ret
 
-print('parents:')
-print(g.fitness())
-print(g1.fitness())
+	#using roulette selection
+	def select(self):
+		p = random.uniform(0, sum(x[1] for x in self.currentGroup))
+		for i, a in enumerate(self.currentGroup):
+			_, f = a
+			if p <= 0:
+				break
+			p -= f
+		return self.currentGroup[i]
+
+	def generateChildren(self):
+		mom = self.select()
+		dad = self.select()
+
+		children = self.crossover(mom[0], dad[0])
+
+		return children, children.value()
+
+	def crossover(self, mom, dad): 
+		unassignedEvents = []
+		child = Allocation(TIMESLOTS)
+		for e in EVENTS:
+    			
+			# Mutate
+			if random.uniform(0, 1) < self.probM:
+				slots = getPossibleSlots(e, child.slots)
+				if len(slots) != 0:
+					s, rooms = random.choice(slots)
+					r = random.choice(rooms)
+					child.allocate(s, e.id, r)
+					continue
+
+
+			s1 = None
+			s2 = None
+			r1 = None
+			r2 = None
+			is_compatible_mom = False
+			is_compatible_dad = False
+		
+			try:
+				s1, r1 = mom.event_data[e.id]
+				is_compatible_mom = all(helper.isCompatible(e.id, e1) for e1 in child.slots[s1].distribution.keys())\
+					and r1 not in child.slots[s1].distribution.values()
+			except KeyError:
+				pass
+
+			try:
+				s2, r2 = dad.event_data[e.id]
+				is_compatible_dad = all(helper.isCompatible(e.id, e1) for e1 in child.slots[s2].distribution.keys())\
+					and r2 not in child.slots[s2].distribution.values()
+			except KeyError:
+				pass
+			
+			if s1 and s2:
+				if random.randint(0, 1) and is_compatible_mom:
+					child.allocate(s1, e.id, r1)
+				elif is_compatible_dad:
+					child.allocate(s2, e.id, r2)
+				else:
+					unassignedEvents.append(e.id)
+			elif not s1 and is_compatible_dad:
+				child.allocate(s2, e.id, r2)
+			elif not s2 and is_compatible_mom:
+				child.allocate(s1, e.id, r1)
+			else:
+				unassignedEvents.append(e.id)
+
+		for e in unassignedEvents.copy():
+			if tryPlaceEvent(e, child.slots):
+				unassignedEvents.remove(e)
+
+		return child
+				
+	def nextGeneration(self):
+		nextGeneration = self.currentGroup[:self.elitism]
+
+		while len(nextGeneration) < len(self.currentGroup):
+			nextGeneration.append(self.generateChildren())
+
+		nextGeneration.sort(key = lambda x : x[1])
+		self.currentGroup = nextGeneration
