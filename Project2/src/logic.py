@@ -15,7 +15,6 @@ def hill_climbing_1():
         print("Current: ", current_value)
         print("Neighbour: ", neighbour_value)
         if neighbour_value >= current_value:
-            print("Here")
             return current
         current = neighbour
         current_value = neighbour_value
