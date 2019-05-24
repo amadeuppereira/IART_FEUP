@@ -7,7 +7,7 @@ MAX_ATTEMPS = 10000
 
 
 def hill_climbing_1():
-    print("Hill Climbing\n")
+    print("Hill Climbing Basic\n")
     current = generateRandomAllocation()
     current_value = current.value()
     while(1):
@@ -22,7 +22,7 @@ def hill_climbing_1():
 
 
 def hill_climbing_2():
-    print("Hill Climbing\n")
+    print("Hill Climbing Steepest ascent\n")
     current = generateRandomAllocation()
     current_value = current.value()
     while(1):
@@ -38,7 +38,7 @@ def hill_climbing_2():
 def simulated_annealing():
     print("Simulated Annealing\n")
     current = generateRandomAllocation()
-    T = 30
+    T = 20
     for i in range(1, MAX_ATTEMPS):
         if T < 0:
             return current
@@ -56,18 +56,13 @@ def simulated_annealing():
     return current
 
 
-# result = hill_climbing()
-result = hill_climbing_2()
-# result = simulated_annealing()
-result.writeToFile()
-
-
 SIZE = 20
 MUTATION_RATE = 0.1
 ELITISM = 5
 
 
 def genetic_algorithm():
+    print("Genetic Algorithm\n")
     population = Population(
         SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
     for i in range(20):
@@ -75,6 +70,3 @@ def genetic_algorithm():
         population.nextGeneration()
 
     return population.currentGroup[0][0]
-
-
-# genetic_algorithm()

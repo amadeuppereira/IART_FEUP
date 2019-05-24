@@ -332,41 +332,28 @@ def getRandomNeighbour(allocation):
     event = EVENTS[event_id]
     slot_id, slot_room = initial_copy.removeEvent1(event_id)
 
-    # MOVE
-    if random.randint(0, 1):
-        possible_slots = getPossibleSlots(event, initial_copy.slots)
-        if len(possible_slots) == 0:
-            return getRandomNeighbour(allocation)
-        slot = possible_slots[random.randint(0, len(possible_slots)-1)]
-        if len(slot[1]) == 0:
-            return getRandomNeighbour(allocation)
-        room = slot[1][random.randint(0, len(slot[1])-1)]
-
-        initial_copy.allocate(slot[0], event_id, room)
-    # SWAP
-    else:
-        event1_id = random.randint(0, len(EVENTS)-1)
-        if event_id == event1_id:
-            return getRandomNeighbour(allocation)
-        event1 = EVENTS[event1_id]
-        e1_slot, e1_room = initial_copy.removeEvent1(event1_id)
-        if all(helper.isCompatible(event_id, eTemp) for eTemp in initial_copy.slots[e1_slot].distribution.keys()) and \
-                all(helper.isCompatible(event1_id, eTemp) for eTemp in initial_copy.slots[slot_id].distribution.keys()):
-            usable_rooms_e = np.setdiff1d(helper.getEventRooms(
-                event_id), initial_copy.slots[e1_slot].distribution.keys())
-            if len(usable_rooms_e) > 0:
-                usable_rooms_e1 = np.setdiff1d(helper.getEventRooms(
-                    event1_id), initial_copy.slots[slot_id].distribution.keys())
-                if len(usable_rooms_e1) <= 0:
-                    return getRandomNeighbour(allocation)
-                initial_copy.allocate(
-                    e1_slot, event_id, random.choice(usable_rooms_e))
-                initial_copy.allocate(slot_id, event1_id,
-                                      random.choice(usable_rooms_e1))
-            else:
+    event1_id = random.randint(0, len(EVENTS)-1)
+    if event_id == event1_id:
+        return getRandomNeighbour(allocation)
+    event1 = EVENTS[event1_id]
+    e1_slot, e1_room = initial_copy.removeEvent1(event1_id)
+    if all(helper.isCompatible(event_id, eTemp) for eTemp in initial_copy.slots[e1_slot].distribution.keys()) and \
+            all(helper.isCompatible(event1_id, eTemp) for eTemp in initial_copy.slots[slot_id].distribution.keys()):
+        usable_rooms_e = np.setdiff1d(helper.getEventRooms(
+            event_id), initial_copy.slots[e1_slot].distribution.keys())
+        if len(usable_rooms_e) > 0:
+            usable_rooms_e1 = np.setdiff1d(helper.getEventRooms(
+                event1_id), initial_copy.slots[slot_id].distribution.keys())
+            if len(usable_rooms_e1) <= 0:
                 return getRandomNeighbour(allocation)
+            initial_copy.allocate(
+                e1_slot, event_id, random.choice(usable_rooms_e))
+            initial_copy.allocate(slot_id, event1_id,
+                                  random.choice(usable_rooms_e1))
         else:
             return getRandomNeighbour(allocation)
+    else:
+        return getRandomNeighbour(allocation)
 
     return initial_copy, initial_copy.value()
 

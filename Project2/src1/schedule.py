@@ -7,13 +7,6 @@ def start():
     print("-    Timetabling Generator    -")
     print("-------------------------------")
 
-    print("\n-> Insert input file name (without '.tim'): ", end='')
-    filename = str(input())
-
-    if not os.path.isfile(filename + ".tim"):
-        print("File not found!")
-        return
-
     print("\n-> Select algorithm:")
     print("1. Hill-Climbing Basic")
     print("2. Hill-Climbing Steepest ascent")
@@ -34,7 +27,7 @@ def start():
         print("Wrong option!")
         return
 
-    # result.writeToFile()
+    result.writeToFile()
 
 
 start()
