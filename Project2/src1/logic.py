@@ -4,13 +4,6 @@ import random
 
 MAX_ATTEMPS = 10000
 
-# - Escolher um estado aleatoriamente do espaço de estados
-# – Considerar todos os vizinhos desse estado
-# – Escolher o melhor vizinho
-# – Repetir o processo até não existirem vizinhos melhores
-# – O estado corrente é a solução
-
-
 def hill_climbing():
     print("Hill Climbing\n")
     current = generateRandomAllocation()
@@ -22,7 +15,6 @@ def hill_climbing():
         if neighbour_value >= current_value:
             return current
         current = neighbour
-
 
 def simulated_annealing():
     print("Simulated Annealing\n")
@@ -46,9 +38,6 @@ def simulated_annealing():
 
 # result = hill_climbing()
 result = simulated_annealing()
-
 result.writeToFile()
 
-# alloc = generateRandomAllocation()
-# print(alloc.value())
-# print(getRandomNeighbour(alloc))
+
