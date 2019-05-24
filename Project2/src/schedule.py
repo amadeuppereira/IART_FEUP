@@ -1,6 +1,6 @@
 import os
 from logic import hill_climbing_1, hill_climbing_2, simulated_annealing, genetic_algorithm
-
+from settings import FILENAME
 
 def start():
     print("-------------------------------")
@@ -8,9 +8,9 @@ def start():
     print("-------------------------------")
 
     print("\n-> Insert input file name (without '.tim'): ", end='')
-    filename = str(input())
+    FILENAME = str(input())
 
-    if not os.path.isfile(filename + ".tim"):
+    if not os.path.isfile(FILENAME + ".tim"):
         print("File not found!")
         return
 
@@ -36,13 +36,6 @@ def start():
         return
 
     result.writeToFile()
-
-    print("--------------")
-    print("Press 1 to run the competition validator program")
-    option = int(input())
-    
-    if option == 1:
-        os.system("./check {}".format(filename))
 
 
 start()
