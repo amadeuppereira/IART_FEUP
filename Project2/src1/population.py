@@ -13,10 +13,11 @@ class Population:
 		self.elitism = elitism
 		self.probM = probM
 		self.currentGroup = self.generate(size, seed)
-		self.currentValues = list(map(lambda x: x.fitness(), self.currentGroup))
+		# self.currentValues = list(map(lambda x: x.value(), self.currentGroup))
 
 	def generate(self, size, seed):
 		ret = [getRandomNeighbour(seed) for x in range(size)]
+		ret.sort(key = lambda x : x[1])
 		return ret
 
 	def getFittest(self):
@@ -44,8 +45,9 @@ class Population:
 
 	#using roulette selection
 	def select(self):
-		p = random.uniform(0, sum(self.currentValues))
-		for i, f in enumerate(self.currentValues):
+		p = random.uniform(0, sum(x[1] for x in self.currentGroup))
+		for i, a in enumerate(self.currentGroup):
+			_, f = a
 			if p <= 0:
 				break
 			p -= f
@@ -65,18 +67,15 @@ class Population:
 
 		return mutatedChildren
 
-	def improveGeneration(self):
-		nextGeneration = []
+	def nextGeneration(self):
+		nextGeneration = self.currentGroup[:self.elitism]
 
 		while len(nextGeneration) < len(self.currentGroup):
-			nextGeneration = nextGeneration + self.generateChildren()
+			# nextGeneration = nextGeneration + self.generateChildren()
+			nextGeneration.append(self.select())
 
-		if len(nextGeneration) > len(self.currentGroup):
-			nextGeneration = nextGeneration[:-1]
+		# if len(nextGeneration) > len(self.currentGroup):
+		# 	nextGeneration = nextGeneration[:-1]
 
-		self.currentGroup = nextGeneration
-		self.currentValues = list(map(lambda x: x.fitness(), nextGeneration))
-
-		return self
-
-
+		# self.currentGroup = nextGeneration
+		# self.currentValues = list(map(lambda x: x.fitness(), nextGeneration))

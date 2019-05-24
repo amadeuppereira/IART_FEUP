@@ -46,9 +46,11 @@ ELITISM = 5
 
 def genetic_algorithm():
     population = Population(SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
-    for p in population:
-        print(p.value())
-    
-    print(population.currentValues)
+    for p in population.currentGroup:
+        print(p)
+    population.nextGeneration()
+    print()
+    for p in population.currentGroup:
+        print(p)
 
 genetic_algorithm()
