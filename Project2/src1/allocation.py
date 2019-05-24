@@ -2,6 +2,7 @@ from settings import TIMESLOTS, SLOTS_PER_DAY, FILENAME
 from helper import Helper
 from input import EVENTS, ROOMS, STUDENTS, num_features
 import copy as cp
+import numpy as np
 import random
 
 helper = Helper()
@@ -9,7 +10,6 @@ helper = Helper()
 class Slot:
     def __init__(self, id):
         self.id = id
-        self.n_events = 0
         self.distribution = {}
 
     def update(self, event, room):
@@ -27,6 +27,7 @@ class Slot:
 class Allocation:
     def __init__(self, nslots):
         self.slots = {}
+        self.v = None
         self.event_data = {}
         for i in range(nslots):
             self.slots[i] = Slot(i)
@@ -41,16 +42,28 @@ class Allocation:
     def finish(self):
         for slotid, slot in self.slots.items():
             for eventid, room in slot.distribution.items():
-                self.event_data[eventid] = {'slot':slotid, 'room':room}
+                self.event_data[eventid] = (slotid, room)
 
     def allocate(self, slot, event, room = None):
+        self.v = None
         self.slots[slot].update(event, room)
+        self.event_data[event] = (slot, room)
 
     def updateEventRoom(self, slot, event, room):
+        self.v = None
         self.slots[slot].update(event, room)
+        self.event_data[event] = (slot, room)
 
     def removeEvent(self, slot, event):
+        self.v = None
         self.slots[slot].remove(event)
+        self.event_data.pop(event)
+
+    def removeEvent1(self, event):
+        self.v = None
+        s, r = self.event_data.pop(event)
+        self.slots[s].remove(event)
+        return s, r
 
     def isFeasible(self):
         used_events = set()
@@ -73,6 +86,9 @@ class Allocation:
         return len(used_events) == len(EVENTS)
 
     def value(self):
+        if self.v:
+            return self.v
+
         single_event = 0
         end_of_day = 0
         intensive = 0
@@ -96,7 +112,7 @@ class Allocation:
         for s in STUDENTS:
             student_slots = []
             for eventid in s.events:
-                student_slots.append(self.event_data[eventid]['slot'])
+                student_slots.append(self.event_data[eventid][0])
 
             new_student_slots = []
             for i in range(int(TIMESLOTS / SLOTS_PER_DAY)):
@@ -129,7 +145,10 @@ class Allocation:
 
             intensive += sum(list(map(lambda x: x-2 if x-2 > 0 else 0, consecutives)))
 
-        return single_event + end_of_day + intensive
+        print(single_event, end_of_day, intensive)
+        value = single_event + end_of_day + intensive
+        self.v = value
+        return value
 
     def writeToFile(self):
         output_file = open(FILENAME + ".sln", "w")
@@ -141,6 +160,81 @@ class Allocation:
 
         output_file.close()
                 
+    def copy(self):
+        ret = Allocation(TIMESLOTS)
+        ret.slots = cp.deepcopy(self.slots)
+        ret.value = self.value
+        ret.event_data = cp.deepcopy(self.event_data)
+        return ret
+
+    def getBestNeighbour(self):
+        initial_copy = self.copy()
+        best_alloc = None
+        best_value = float('Inf')
+
+        for e in EVENTS:
+            # print("Moving event {}".format(e.id))
+            e_slot, e_room = initial_copy.removeEvent1(e.id)
+
+            # MOVES
+            e_possible_slots = getPossibleSlots(e, initial_copy.slots)
+            for i, s in enumerate(e_possible_slots):
+                for r in e_possible_slots[i][1]:
+                    initial_copy.allocate(s[0], e.id, r)
+                    new_value = initial_copy.value()
+                    if new_value < best_value:
+                        best_alloc = cp.deepcopy(initial_copy)
+                        best_value = new_value
+
+                    initial_copy.removeEvent1(e.id)
+        
+            # SWAPS
+            for e1 in EVENTS:
+                if e1.id == e.id:
+                    continue
+                e1_slot, e1_room = initial_copy.removeEvent1(e1.id)
+                if all(helper.isCompatible(e.id, eTemp) for eTemp in initial_copy.slots[e1_slot].distribution.keys()) and \
+                    all(helper.isCompatible(e1.id, eTemp) for eTemp in initial_copy.slots[e_slot].distribution.keys()):
+                    usable_rooms_e = np.setdiff1d(helper.getEventRooms(e.id), initial_copy.slots[e1_slot].distribution.keys())
+                    if len(usable_rooms_e) > 0:
+                        usable_rooms_e1 = np.setdiff1d(helper.getEventRooms(e1.id), initial_copy.slots[e_slot].distribution.keys())
+                        if len(usable_rooms_e1) > 0:
+                            for r in usable_rooms_e:
+                                initial_copy.allocate(e1_slot, e.id, r)
+                                for r1 in usable_rooms_e1:
+                                    initial_copy.allocate(e_slot, e1.id, r1)
+                                    new_value = initial_copy.value() 
+                                    if new_value < best_value:
+                                        best_alloc = cp.deepcopy(initial_copy)
+                                        best_value = new_value
+                                    initial_copy.removeEvent(e_slot, e1.id)
+
+                                initial_copy.removeEvent(e1_slot, e.id)
+                initial_copy.allocate(e1_slot, e1.id, e1_room)
+
+
+            initial_copy.allocate(e_slot, e.id, e_room)
+
+        return best_alloc, best_value
+
+    def getRandomNeighbour(self):
+        initial_copy = self.copy()
+        event_id = random.randint(0, len(EVENTS)-1)
+        event = EVENTS[event_id]
+        slot_id, slot_room = initial_copy.removeEvent1(event_id)
+
+        possible_slots = getPossibleSlots(event, initial_copy.slots)
+        if len(possible_slots) == 0:
+            self.getRandomNeighbour()
+        slot = possible_slots[random.randint(0, len(possible_slots)-1)]
+        if len(slot[1]) == 0:
+            self.getRandomNeighbour()
+        room = slot[1][random.randint(0, len(slot[1])-1)]
+
+        initial_copy.allocate(slot[0], event_id, room)
+
+        return initial_copy, initial_copy.value()
+
 
 # ----- ----- ----- ----- ----- -----
 
@@ -149,19 +243,21 @@ def getPossibleSlots(event, slots):
     for slot in slots.values():
         flag = True
         events = slot.distribution.keys()
-        if len(events) > len(ROOMS):
+        if len(events) >= len(ROOMS):
             continue
         rooms = slot.distribution.values()
-        if not all(r in rooms for r in helper.getEventRooms(event.id)):
+        # if not all(r in rooms for r in helper.getEventRooms(event.id)):
+        usable_rooms = np.setdiff1d(helper.getEventRooms(event.id), rooms)
+        if len(usable_rooms) > 0:
             for event_id in events:
                 if not helper.isCompatible(event.id, event_id):
                     flag = False
                     break
 
             if flag:
-                ret.append(slot.id)
+                ret.append((slot.id, usable_rooms))
 
-    ret.sort(key=lambda x: slots[x].n_events)
+    ret.sort(key=lambda x: len(slots[x[0]].distribution))
     return ret
 
 def generateRandomAllocation():
@@ -173,7 +269,7 @@ def generateRandomAllocation():
     for e in EVENTS:
         possibleSlots = getPossibleSlots(e, slots)
         if len(possibleSlots) > 0:
-            alloc.allocate(possibleSlots[0], e.id)
+            alloc.allocate(possibleSlots[0][0], e.id)
         else:
             unassignedEvents.append(e.id)
 
@@ -332,8 +428,9 @@ def distributeEventRoomsHelper(id, matches, seen):
                 return True
     return False
 
+# alloc = generateRandomAllocation()
+# print(alloc.isFeasible())
+# print(alloc.value())
+# alloc.writeToFile()
 
-test = generateRandomAllocation()
-print(test.isFeasible())
-print(test.value())
-test.writeToFile()
+# print(alloc.getBestNeighbour())
