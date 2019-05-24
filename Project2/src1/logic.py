@@ -40,17 +40,17 @@ def simulated_annealing():
 # result = simulated_annealing()
 # result.writeToFile()
 
-SIZE = 50
+SIZE = 20
 MUTATION_RATE = 0.1
 ELITISM = 5
 
 def genetic_algorithm():
     population = Population(SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
-    for p in population.currentGroup:
-        print(p)
-    population.nextGeneration()
-    print()
-    for p in population.currentGroup:
-        print(p)
+    for i in range(20):
+        print("\t{}/{}".format(i, 20), end='\r')
+        population.nextGeneration()
+
+    return population.currentGroup[0][0]
+
 
 genetic_algorithm()
