@@ -114,7 +114,10 @@ class Allocation:
         for s in STUDENTS:
             student_slots = []
             for eventid in s.events:
-                student_slots.append(self.event_data[eventid][0])
+                try:
+                    student_slots.append(self.event_data[eventid][0])
+                except KeyError:
+                    pass
 
             new_student_slots = []
             for i in range(int(TIMESLOTS / SLOTS_PER_DAY)):
@@ -149,6 +152,8 @@ class Allocation:
                                       2 > 0 else 0, consecutives)))
 
         value = single_event + end_of_day + intensive
+        if not self.isFeasible():
+            value += 10000
         self.alloc_value = value
         return value
 

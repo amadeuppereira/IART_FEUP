@@ -62,7 +62,7 @@ result = hill_climbing_2()
 result.writeToFile()
 
 
-SIZE = 50
+SIZE = 20
 MUTATION_RATE = 0.1
 ELITISM = 5
 
@@ -70,10 +70,11 @@ ELITISM = 5
 def genetic_algorithm():
     population = Population(
         SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
-    for p in population:
-        print(p.value())
+    for i in range(20):
+        print("\t{}/{}".format(i, 20), end='\r')
+        population.nextGeneration()
 
-    print(population.currentValues)
+    return population.currentGroup[0][0]
 
 
 # genetic_algorithm()
