@@ -1,4 +1,4 @@
-from allocation import Allocation, generateRandomAllocation
+from allocation import Allocation, generateRandomAllocation, getRandomNeighbour
 import math
 import random
 
@@ -9,6 +9,7 @@ MAX_ATTEMPS = 10000
 # – Escolher o melhor vizinho
 # – Repetir o processo até não existirem vizinhos melhores
 # – O estado corrente é a solução
+
 
 def hill_climbing():
     print("Hill Climbing\n")
@@ -29,11 +30,13 @@ def hill_climbing():
 def simulated_annealing():
     print("Simulated Annealing\n")
     current = generateRandomAllocation()
+    print(current.value())
     T = 30
     for i in range(1, MAX_ATTEMPS):
         if T < 0:
             return current
-        neighbour, neighbour_value = current.getRandomNeighbour()
+        # neighbour, neighbour_value = current.getRandomNeighbour()
+        neighbour, neighbour_value = getRandomNeighbour(current)
         current_value = current.value()
         diff = neighbour_value - current_value
         print("Current Value", current_value, "----- Temperature",
@@ -44,6 +47,7 @@ def simulated_annealing():
             current = neighbour
         T = T - ((1/math.log(1+i))*0.1)
     return current
+
 
 # result = hill_climbing()
 result = simulated_annealing()
