@@ -1,88 +1,72 @@
+from allocation import Allocation, generateRandomAllocation, getRandomNeighbour, getBestNeighbour, getBetterNeighbour
+from population import Population
 import math
 import random
-from schedule import getRandomSolution, value, getBestNeighbour, getRandomNeighbour, getBetterRandomNeighbour
-from output import *
-from input import num_events
 
 MAX_ATTEMPS = 10000
 
 
-# - Escolher um estado aleatoriamente do espaço de estados
-# – Considerar todos os vizinhos desse estado
-# – Escolher o melhor vizinho
-# – Repetir o processo até não existirem vizinhos melhores
-# – O estado corrente é a solução
+def hill_climbing_1():
+    print("Hill Climbing Basic\n")
+    current = generateRandomAllocation()
+    current_value = current.value()
+    while(1):
+        neighbour, neighbour_value = getBetterNeighbour(current)
+        print("Current: ", current_value)
+        print("Neighbour: ", neighbour_value)
+        if neighbour_value >= current_value:
+            print("Here")
+            return current
+        current = neighbour
+        current_value = neighbour_value
 
 
-def hill_climbing():
-    print("Hill Climbing")
-    current = getRandomSolution()
-    for i in range(1, MAX_ATTEMPS):
-        current_value = value(current)
+def hill_climbing_2():
+    print("Hill Climbing Steepest ascent\n")
+    current = generateRandomAllocation()
+    current_value = current.value()
+    while(1):
         neighbour, neighbour_value = getBestNeighbour(current)
         print("Current: ", current_value)
         print("Neighbour: ", neighbour_value)
-        if neighbour_value > current_value:
+        if neighbour_value >= current_value:
             return current
         current = neighbour
-    return current
-
-
-MAX_ATTEMPS_RANDOM = 900
-
-
-def hill_climbing_improved():
-    print("Hill Climbing")
-    current = getRandomSolution()
-    print(value(current))
-    flag = False
-    for i in range(1, MAX_ATTEMPS):
-        current_value = value(current)
-        if flag:
-            neighbour, neighbour_value = getBestNeighbour(current)
-        else:
-            neighbour, neighbour_value = getBetterRandomNeighbour(
-                current, current_value, MAX_ATTEMPS_RANDOM)
-        print("Current: ", current_value)
-        print("Neighbour: ", neighbour_value)
-        if neighbour_value > current_value:
-            return current
-        elif neighbour == current:
-            return current
-        elif neighbour_value == current_value:
-            flag = True
-        current = neighbour
-    return current
-
-
-# – Semelhante ao Hill-Climbing Search mas admite explorar vizinhos piores
-# – Temperatura que vai sendo sucessivamente reduzida define a probabilidade de aceitar soluções piores
+        current_value = neighbour_value
 
 
 def simulated_annealing():
-    current = getRandomSolution()
-    T = 30
+    print("Simulated Annealing\n")
+    current = generateRandomAllocation()
+    T = 20
     for i in range(1, MAX_ATTEMPS):
         if T < 0:
             return current
-        next = getRandomNeighbour(current)
-        next_value = value(next)
-        current_value = value(current)
-        diff = next_value - current_value
+        neighbour, neighbour_value = getRandomNeighbour(current)
+        current_value = current.value()
+        diff = neighbour_value - current_value
+        probability = math.exp(-diff/T)
         print("Current Value", current_value, "----- Temperature",
-              T, "----- Probability", math.exp(-diff/T))
+              T, "----- Probability", probability)
         if diff < 0:
-            current = next
-        elif math.exp(-diff/T) > random.uniform(0, 1):
-            current = next
+            current = neighbour
+        elif probability > random.uniform(0, 1):
+            current = neighbour
         T = T - ((1/math.log(1+i))*0.1)
     return current
 
 
-# solution = hill_climbing_improved()
-solution = simulated_annealing()
-print(value(solution))
+SIZE = 20
+MUTATION_RATE = 0.1
+ELITISM = 5
 
-for x in solution:
-    print(x.id, x.event_room)
-# write_to_file(solution, num_events)
+
+def genetic_algorithm():
+    print("Genetic Algorithm\n")
+    population = Population(
+        SIZE, generateRandomAllocation(), MUTATION_RATE, ELITISM)
+    for i in range(20):
+        print("\t{}/{}".format(i, 20), end='\r')
+        population.nextGeneration()
+
+    return population.currentGroup[0][0]

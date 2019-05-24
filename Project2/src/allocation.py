@@ -228,7 +228,7 @@ def getBestNeighbour(allocation):
     best_value = float('Inf')
 
     for e in EVENTS:
-        print("Moving event {}".format(e.id), end='\r')
+        # print("Moving event {}".format(e.id), end='\r')
         e_slot, e_room = initial_copy.removeEvent1(e.id)
 
         # MOVES
@@ -366,7 +366,6 @@ def getPossibleSlots(event, slots):
         if len(events) >= len(ROOMS):
             continue
         rooms = slot.distribution.values()
-        # if not all(r in rooms for r in helper.getEventRooms(event.id)):
         usable_rooms = np.setdiff1d(helper.getEventRooms(event.id), rooms)
         if len(usable_rooms) > 0:
             for event_id in events:
@@ -414,8 +413,8 @@ def generateRandomAllocation():
 
     best = slots, unassignedEvents
     for i in range(101):
-        print("Blowing up {}/{} ({} unassigned events)".format(i,
-                                                               100, len(best[1])), end='\r')
+        print("{}/{} ({} unassigned events)".format(i,
+                                                    100, len(best[1])), end='\r')
         temp_best = best
         for _ in range(3):
             slotsCopy = cp.deepcopy(temp_best[0])

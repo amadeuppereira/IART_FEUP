@@ -1,6 +1,37 @@
-from settings import *
+from settings import FILENAME
 
-input_file = open(filename + ".tim", "r")
+class Room:
+    def __init__(self, id, size, features = None):
+        self.id = id
+        self.size = size
+        self.features = features if features else []
+    
+    def addFeature(self, feature):
+        self.features.append(feature)
+        
+class Student:
+    def __init__(self, id, events = None):
+        self.id = id
+        self.events = events if events else []
+        
+    def addEvent(self, event):
+        self.events.append(event)
+
+class Event:
+    def __init__(self, id, features = None):
+        self.id = id
+        self.features = features if features else []
+    
+    def addFeature(self, feature):
+        self.features.append(feature)
+
+ROOMS = []
+STUDENTS = []
+EVENTS = []
+
+# ----- ----- ----- ----- ----- ----- ----- ----- -----
+
+input_file = open(FILENAME + ".tim", "r")
 
 first_line = input_file.readline().split()
 num_events = int(first_line[0])
@@ -8,40 +39,29 @@ num_rooms = int(first_line[1])
 num_features = int(first_line[2])
 num_students = int(first_line[3])
 
-rooms = []
+# parse room size
 for i in range(0, num_rooms):
-    rooms.append(int(input_file.readline()))
+    r = Room(i, int(input_file.readline()))
+    ROOMS.append(r)
 
-
-# students_events[student][event]
-# if 0 the students does not attend the event
-# if 1 the students attends the event
-students_events = []
+# parse student/event info
 for i in range(0, num_students):
-    events_temp = []
+    s = Student(i)
     for j in range(0, num_events):
-        num = int(input_file.readline())
-        events_temp.append(num)
-    students_events.append(events_temp)
+        if int(input_file.readline()):
+            s.addEvent(j)
+    STUDENTS.append(s)
 
-
-# rooms_features[room][feature]
-# if 0 the room does not satisfy the feature
-# if 1 the room satisfies the feature
-rooms_features = []
+# parse room/feature info
 for i in range(0, num_rooms):
-    features_temp = []
     for j in range(0, num_features):
-        features_temp.append(int(input_file.readline()))
-    rooms_features.append(features_temp)
+        if int(input_file.readline()):
+            ROOMS[i].addFeature(j)
 
-
-# events_features[event][feature]
-# if 0 the event does not require the feature
-# if 1 the event requires the feature
-events_features = []
+# parse event/feature info
 for i in range(0, num_events):
-    features_temp = []
+    e = Event(i)
     for j in range(0, num_features):
-        features_temp.append(int(input_file.readline()))
-    events_features.append(features_temp)
+        if int(input_file.readline()):
+            e.addFeature(j)
+    EVENTS.append(e)
