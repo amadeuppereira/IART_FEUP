@@ -29,7 +29,7 @@ class Slot:
 class Allocation:
     def __init__(self, nslots):
         self.slots = {}
-        self.v = None
+        self.alloc_value = None
         self.event_data = {}
         for i in range(nslots):
             self.slots[i] = Slot(i)
@@ -47,22 +47,22 @@ class Allocation:
                 self.event_data[eventid] = (slotid, room)
 
     def allocate(self, slot, event, room=None):
-        self.v = None
+        self.alloc_value = None
         self.slots[slot].update(event, room)
         self.event_data[event] = (slot, room)
 
     def updateEventRoom(self, slot, event, room):
-        self.v = None
+        self.alloc_value = None
         self.slots[slot].update(event, room)
         self.event_data[event] = (slot, room)
 
     def removeEvent(self, slot, event):
-        self.v = None
+        self.alloc_value = None
         self.slots[slot].remove(event)
         self.event_data.pop(event)
 
     def removeEvent1(self, event):
-        self.v = None
+        self.alloc_value = None
         s, r = self.event_data.pop(event)
         self.slots[s].remove(event)
         return s, r
@@ -88,8 +88,8 @@ class Allocation:
         return len(used_events) == len(EVENTS)
 
     def value(self):
-        if self.v:
-            return self.v
+        if self.alloc_value:
+            return self.alloc_value
 
         single_event = 0
         end_of_day = 0
@@ -148,9 +148,8 @@ class Allocation:
             intensive += sum(list(map(lambda x: x-2 if x -
                                       2 > 0 else 0, consecutives)))
 
-        print(single_event, end_of_day, intensive)
         value = single_event + end_of_day + intensive
-        self.v = value
+        self.alloc_value = value
         return value
 
     def writeToFile(self):
@@ -163,13 +162,6 @@ class Allocation:
                     break
 
         output_file.close()
-
-    def copy(self):
-        ret = Allocation(TIMESLOTS)
-        ret.slots = cp.deepcopy(self.slots)
-        ret.value = self.value
-        ret.event_data = cp.deepcopy(self.event_data)
-        return ret
 
     def getBestNeighbour(self):
         initial_copy = self.copy()
@@ -222,46 +214,102 @@ class Allocation:
 
         return best_alloc, best_value
 
-    def getRandomNeighbour(self):
-        initial_copy = self.copy()
-        event_id = random.randint(0, len(EVENTS)-1)
-        event = EVENTS[event_id]
-        slot_id, slot_room = initial_copy.removeEvent1(event_id)
-
-        possible_slots = getPossibleSlots(event, initial_copy.slots)
-        if len(possible_slots) == 0:
-            self.getRandomNeighbour()
-        slot = possible_slots[random.randint(0, len(possible_slots)-1)]
-        if len(slot[1]) == 0:
-            self.getRandomNeighbour()
-        room = slot[1][random.randint(0, len(slot[1])-1)]
-
-        initial_copy.allocate(slot[0], event_id, room)
-
-        return initial_copy, initial_copy.value()
-
 
 # ----- ----- ----- ----- ----- -----
 
-def getRandomNeighbour(slots):
-    initial_copy = cp.deepcopy(slots)
+def getBestNeighbour(allocation):
+    initial_copy = cp.deepcopy(allocation)
+    best_alloc = None
+    best_value = float('Inf')
+
+    for e in EVENTS:
+        print("Moving event {}".format(e.id), end='\r')
+        e_slot, e_room = initial_copy.removeEvent1(e.id)
+
+        # MOVES
+        e_possible_slots = getPossibleSlots(e, initial_copy.slots)
+        for i, s in enumerate(e_possible_slots):
+            for r in e_possible_slots[i][1]:
+                initial_copy.allocate(s[0], e.id, r)
+                new_value = initial_copy.value()
+                if new_value < best_value:
+                    best_alloc = cp.deepcopy(initial_copy)
+                    best_value = new_value
+
+                initial_copy.removeEvent1(e.id)
+
+        # SWAPS
+        for e1 in EVENTS:
+            if e1.id == e.id:
+                continue
+            e1_slot, e1_room = initial_copy.removeEvent1(e1.id)
+            if all(helper.isCompatible(e.id, eTemp) for eTemp in initial_copy.slots[e1_slot].distribution.keys()) and \
+                    all(helper.isCompatible(e1.id, eTemp) for eTemp in initial_copy.slots[e_slot].distribution.keys()):
+                usable_rooms_e = np.setdiff1d(helper.getEventRooms(
+                    e.id), initial_copy.slots[e1_slot].distribution.keys())
+                if len(usable_rooms_e) > 0:
+                    usable_rooms_e1 = np.setdiff1d(helper.getEventRooms(
+                        e1.id), initial_copy.slots[e_slot].distribution.keys())
+                    if len(usable_rooms_e1) > 0:
+                        for r in usable_rooms_e:
+                            initial_copy.allocate(e1_slot, e.id, r)
+                            for r1 in usable_rooms_e1:
+                                initial_copy.allocate(e_slot, e1.id, r1)
+                                new_value = initial_copy.value()
+                                if new_value < best_value:
+                                    best_alloc = cp.deepcopy(initial_copy)
+                                    best_value = new_value
+                                initial_copy.removeEvent(e_slot, e1.id)
+
+                            initial_copy.removeEvent(e1_slot, e.id)
+            initial_copy.allocate(e1_slot, e1.id, e1_room)
+
+        initial_copy.allocate(e_slot, e.id, e_room)
+
+    return best_alloc, best_value
+
+def getRandomNeighbour(allocation):
+    initial_copy = cp.deepcopy(allocation)
     event_id = random.randint(0, len(EVENTS)-1)
     event = EVENTS[event_id]
     slot_id, slot_room = initial_copy.removeEvent1(event_id)
 
-    possible_slots = getPossibleSlots(event, initial_copy.slots)
-    if len(possible_slots) == 0:
-        return getRandomNeighbour(slots)
-    slot = possible_slots[random.randint(0, len(possible_slots)-1)]
-    if len(slot[1]) == 0:
-        return getRandomNeighbour(slots)
-    room = slot[1][random.randint(0, len(slot[1])-1)]
+    # MOVE
+    # if random.randint(0, 1):
+    if False:
+        possible_slots = getPossibleSlots(event, initial_copy.slots)
+        if len(possible_slots) == 0:
+            return getRandomNeighbour(allocation)
+        slot = possible_slots[random.randint(0, len(possible_slots)-1)]
+        if len(slot[1]) == 0:
+            return getRandomNeighbour(allocation)
+        room = slot[1][random.randint(0, len(slot[1])-1)]
 
-    initial_copy.allocate(slot[0], event_id, room)
+        initial_copy.allocate(slot[0], event_id, room)
+    #SWAP
+    else:
+        event1_id = random.randint(0, len(EVENTS)-1)
+        if event_id == event1_id:
+            return getRandomNeighbour(allocation)
+        event1 = EVENTS[event1_id]
+        e1_slot, e1_room = initial_copy.removeEvent1(event1_id)
+        if all(helper.isCompatible(event_id, eTemp) for eTemp in initial_copy.slots[e1_slot].distribution.keys()) and \
+                all(helper.isCompatible(event1_id, eTemp) for eTemp in initial_copy.slots[slot_id].distribution.keys()):
+            usable_rooms_e = np.setdiff1d(helper.getEventRooms(event_id), initial_copy.slots[e1_slot].distribution.keys())
+            if len(usable_rooms_e) > 0:
+                usable_rooms_e1 = np.setdiff1d(helper.getEventRooms(event1_id), initial_copy.slots[slot_id].distribution.keys())
+                if len(usable_rooms_e1) <= 0:
+                    return getRandomNeighbour(allocation)
+                initial_copy.allocate(e1_slot, event_id, random.choice(usable_rooms_e))
+                initial_copy.allocate(slot_id, event1_id, random.choice(usable_rooms_e1))
+            else:
+                return getRandomNeighbour(allocation)
+        else:
+            return getRandomNeighbour(allocation)       
+        
 
     return initial_copy, initial_copy.value()
-
-
+    
 def getPossibleSlots(event, slots):
     ret = []
     for slot in slots.values():
@@ -283,7 +331,6 @@ def getPossibleSlots(event, slots):
 
     ret.sort(key=lambda x: len(slots[x[0]].distribution))
     return ret
-
 
 def generateRandomAllocation():
     print("Generating Random Allocation")
@@ -317,9 +364,8 @@ def generateRandomAllocation():
     shuffleSlots(slots, unassignedEvents)
 
     best = slots, unassignedEvents
-    for i in range(100):
-        print(
-            "Blowing up {}/{} ({} unassigned events)".format(i, 100, len(best[1])))
+    for i in range(101):
+        print("Blowing up {}/{} ({} unassigned events)".format(i, 100, len(best[1])), end='\r')
         temp_best = best
         for _ in range(3):
             slotsCopy = cp.deepcopy(temp_best[0])
@@ -340,7 +386,7 @@ def generateRandomAllocation():
         alloc.slots[i] = s
 
     if len(unassignedEvents) > 0:
-        print("Opening end of the day slots")
+        print("\nOpening end of the day slots")
         for e in unassignedEvents.copy():
             if tryPlaceEvent(e, alloc.slots):
                 unassignedEvents.remove(e)
@@ -353,7 +399,6 @@ def generateRandomAllocation():
 
     alloc.finish()
     return alloc
-
 
 def blowupSlots(slots, unassignedEvents):
     if len(unassignedEvents) == 0:
@@ -389,7 +434,6 @@ def blowupSlots(slots, unassignedEvents):
 
     shuffleSlots(slots, unassignedEvents, 5000)
 
-
 def shuffleSlots(slots, unassignedEvents, n=50000):
     for _ in range(n):
         for e in unassignedEvents.copy():
@@ -420,7 +464,6 @@ def shuffleSlots(slots, unassignedEvents, n=50000):
                 else:
                     unassignedEvents.append(e)
 
-
 def tryPlaceEvent(eventid, slots):
     for s in slots.values():
         if len(s.distribution) >= len(ROOMS):
@@ -435,7 +478,6 @@ def tryPlaceEvent(eventid, slots):
                 return True
     return False
 
-
 def distributeEventRooms(slot, randomize=False):
     matches = [None] * len(ROOMS)
     temp = list(slot.distribution.keys()).copy()
@@ -447,7 +489,6 @@ def distributeEventRooms(slot, randomize=False):
 
     return matches
 
-
 def distributeEventRoomsHelper(id, matches, seen):
     for r in range(len(ROOMS)):
         if r in helper.getEventRooms(id) and seen[r] == False:
@@ -456,10 +497,3 @@ def distributeEventRoomsHelper(id, matches, seen):
                 matches[r] = id
                 return True
     return False
-
-# alloc = generateRandomAllocation()
-# print(alloc.isFeasible())
-# print(alloc.value())
-# alloc.writeToFile()
-
-# print(alloc.getBestNeighbour())
